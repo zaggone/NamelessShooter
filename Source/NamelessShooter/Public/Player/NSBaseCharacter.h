@@ -32,17 +32,15 @@ protected:
 
 public:	
 
-	UPROPERTY(BlueprintAssignable)
-	FOnMovingHasDirection OnMovingAcross;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnMovingHasDirection OnMovingAlong;
-
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	float GetMovementDirection();
 private:
+
 	void MoveAlong(float Amount);
 	void MoveAcross(float Amount);
+	
 };

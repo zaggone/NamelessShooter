@@ -13,5 +13,16 @@ UCLASS()
 class NAMELESSSHOOTER_API ANSPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+public:
+
+
+protected:
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+private:
+
+	void SetPawnRotationToMouse();
+
 };

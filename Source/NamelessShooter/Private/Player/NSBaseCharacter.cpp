@@ -5,10 +5,10 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
 
 ANSBaseCharacter::ANSBaseCharacter()
 {
-
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
@@ -38,20 +38,25 @@ void ANSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("MoveAlong", this, &ANSBaseCharacter::MoveAlong);
 	PlayerInputComponent->BindAxis("MoveAcross", this, &ANSBaseCharacter::MoveAcross);
-
 }
 
 void ANSBaseCharacter::MoveAlong(float Amount)
 {
-	OnMovingAlong.Broadcast(Amount);
 	if (Amount == 0.0f) return;
-	AddMovementInput(GetActorForwardVector(), Amount);
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Amount);
 }
 
 void ANSBaseCharacter::MoveAcross(float Amount)
 {
-	OnMovingAcross.Broadcast(Amount);
 	if (Amount == 0.0f) return;
-	AddMovementInput(GetActorRightVector(), Amount);
+	AddMovementInput(FVector(0.0f, 1.0f, 0.0f), Amount);
 }
 
+float ANSBaseCharacter::GetMovementDirection()
+{ 
+	const auto VelocityNormal = GetVelocity().GetSafeNormal();
+	const auto AngleBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
+	const auto CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
+	const auto Degreese = FMath::RadiansToDegrees(AngleBetween);
+	return CrossProduct.IsZero() ? Degreese : Degreese * FMath::Sign(CrossProduct.Z);
+}
