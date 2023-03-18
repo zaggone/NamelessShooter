@@ -6,6 +6,8 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Player/NSPlayerController.h"
 
 ANSBaseCharacter::ANSBaseCharacter()
 {
@@ -28,7 +30,6 @@ void ANSBaseCharacter::BeginPlay()
 void ANSBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ANSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -60,3 +61,4 @@ float ANSBaseCharacter::GetMovementDirection()
 	const auto Degreese = FMath::RadiansToDegrees(AngleBetween);
 	return CrossProduct.IsZero() ? Degreese : Degreese * FMath::Sign(CrossProduct.Z);
 }
+

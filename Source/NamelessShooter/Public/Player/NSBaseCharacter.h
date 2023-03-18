@@ -38,9 +38,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
+	
 private:
-
+	
 	void MoveAlong(float Amount);
 	void MoveAcross(float Amount);
-	
 };

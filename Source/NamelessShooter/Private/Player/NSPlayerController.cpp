@@ -15,19 +15,22 @@ void ANSPlayerController::BeginPlay()
 
 void ANSPlayerController::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 	SetPawnRotationToMouse();
 }
 
-// делаем перса направленным к курсору
 void ANSPlayerController::SetPawnRotationToMouse()
 {
-	const FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+	if (!GetWorld() || !GetPawn()) return;
 	FVector MouseLocation;
 	FVector MouseDirection;
 
 	DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
+	FVector MouseWorldLocation = FVector(MouseLocation.X, MouseLocation.Y, GetPawn()->GetActorLocation().Z);
 
-	FRotator NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), FVector(MouseLocation.X, MouseLocation.Y, GetPawn()->GetActorLocation().Z));
-
+	if ((MouseWorldLocation - GetPawn()->GetActorLocation()).Size() > 1.0f) 
+	{
+		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), MouseWorldLocation);
+	}
 	GetPawn()->SetActorRotation(NeedToRotating);
 }
