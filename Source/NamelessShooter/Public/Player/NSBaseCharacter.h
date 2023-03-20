@@ -31,6 +31,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UNSWeaponComponent* WeaponComponent;
+	
 
 protected:
 
@@ -48,9 +49,20 @@ public:
 	void OnDeath();
 
 	void OnHealthChanged(float Health, float DeltaHealth);
-	
+
+	void StartLookingAround();
+	void StopLookingAround();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	float CameraLookoutVelocity = 5.0f;
+
 private:
+
+	bool bWantsLookAround = false;
 	
 	void MoveAlong(float Amount);
 	void MoveAcross(float Amount);
+
+	void LookAlong(float Amount);
+	void LookAcross(float Amount);
 };

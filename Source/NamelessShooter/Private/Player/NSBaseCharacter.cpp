@@ -32,12 +32,12 @@ void ANSBaseCharacter::BeginPlay()
 
 	HealthComponent->OnDeath.AddUObject(this, &ANSBaseCharacter::OnDeath);
 	HealthComponent->OnHealthChanged.AddUObject(this, &ANSBaseCharacter::OnHealthChanged);
-	
 }
 
 void ANSBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
 // биндинг инпута
@@ -48,6 +48,10 @@ void ANSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("MoveAlong", this, &ANSBaseCharacter::MoveAlong);
 	PlayerInputComponent->BindAxis("MoveAcross", this, &ANSBaseCharacter::MoveAcross);
+	PlayerInputComponent->BindAxis("LookAlong", this, &ANSBaseCharacter::LookAlong);
+	PlayerInputComponent->BindAxis("LookAcross", this, &ANSBaseCharacter::LookAcross);
+	PlayerInputComponent->BindAction("WantsToLookAround", IE_Pressed, this, &ANSBaseCharacter::StartLookingAround);
+	PlayerInputComponent->BindAction("WantsToLookAround", IE_Released, this, &ANSBaseCharacter::StopLookingAround);
 }
 
 // колл бек функция на движение вдоль (кнопка W и S)
@@ -87,9 +91,40 @@ void ANSBaseCharacter::OnDeath()
 	GetMesh()->SetSimulatePhysics(true);
 }
 
-// колл бек функция на изменение здоровья персонажа персонажа (когда погиб)
+// колл бек функция на изменение здоровья персонажа
 void ANSBaseCharacter::OnHealthChanged(float Health, float DeltaHealth)
 {
+	
 
+}
 
+// колл бек на начало обзора окружения
+void ANSBaseCharacter::StartLookingAround()
+{	
+	UE_LOG(LogTemp, Error, TEXT("start"))
+	bWantsLookAround = true;
+
+}
+
+// колл бек на конец обзора окружения
+void ANSBaseCharacter::StopLookingAround()
+{
+	UE_LOG(LogTemp, Error, TEXT("stop"))
+	bWantsLookAround = false;
+	SpringArmComponent->SocketOffset.Y = 0;
+	SpringArmComponent->SocketOffset.X = 0;
+}
+
+// обзор по оси y
+void ANSBaseCharacter::LookAlong(float Amount)
+{
+	if (!bWantsLookAround || Amount == 0) return;
+	SpringArmComponent->SocketOffset.Y += CameraLookoutVelocity * Amount;
+}
+
+// обзор по оси x
+void ANSBaseCharacter::LookAcross(float Amount)
+{
+	if (!bWantsLookAround || Amount == 0) return;
+	SpringArmComponent->SocketOffset.X += CameraLookoutVelocity * Amount;
 }
