@@ -3,3 +3,8 @@
 
 #include "Weapons/NSBow.h"
 
+ANSBow::ANSBow()
+{
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+	WeaponMesh->SetupAttachment(GetRootComponent());
+}

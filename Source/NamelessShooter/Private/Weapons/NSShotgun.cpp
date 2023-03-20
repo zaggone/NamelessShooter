@@ -3,3 +3,8 @@
 
 #include "Weapons/NSShotgun.h"
 
+ANSShotgun::ANSShotgun()
+{
+	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+	WeaponMesh->SetupAttachment(GetRootComponent());
+}

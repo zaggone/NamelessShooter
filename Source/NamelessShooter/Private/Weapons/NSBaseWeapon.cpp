@@ -6,6 +6,8 @@ ANSBaseWeapon::ANSBaseWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	SceneRootComponent = CreateDefaultSubobject<USceneComponent>("SceneRootComponent");
+	SetRootComponent(SceneRootComponent);
 }
 
 void ANSBaseWeapon::BeginPlay()

@@ -8,8 +8,8 @@
 
 class UCameraComponent;
 class USpringArmComponent;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMovingHasDirection, float, Amount);
+class UNSHealthComponent;
+class UNSWeaponComponent;
 
 UCLASS()
 class NAMELESSSHOOTER_API ANSBaseCharacter : public ACharacter
@@ -26,6 +26,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* CameraComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UNSHealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UNSWeaponComponent* WeaponComponent;
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -38,6 +44,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
+
+	void OnDeath();
+
+	void OnHealthChanged(float Health, float DeltaHealth);
 	
 private:
 	

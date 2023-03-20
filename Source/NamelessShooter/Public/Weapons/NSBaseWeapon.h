@@ -12,15 +12,24 @@ class NAMELESSSHOOTER_API ANSBaseWeapon : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ANSBaseWeapon();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	USceneComponent* SceneRootComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UMeshComponent* WeaponMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	FName MuzzleSocketName;
+
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	USceneComponent* GetMesh() const { return WeaponMesh; }
+private:
 
 };

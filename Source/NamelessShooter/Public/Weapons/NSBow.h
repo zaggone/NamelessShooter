@@ -13,5 +13,14 @@ UCLASS()
 class NAMELESSSHOOTER_API ANSBow : public ANSBaseWeapon
 {
 	GENERATED_BODY()
-	
+
+public:
+	ANSBow();
+
+protected:
+
+
+public:
+
+
 };

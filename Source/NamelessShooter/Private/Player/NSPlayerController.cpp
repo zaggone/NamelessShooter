@@ -1,10 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Player/NSPlayerController.h"
 #include "Engine/Engine.h"
 #include "Kismet/KismetMathLibrary.h"
-
 
 void ANSPlayerController::BeginPlay()
 {
