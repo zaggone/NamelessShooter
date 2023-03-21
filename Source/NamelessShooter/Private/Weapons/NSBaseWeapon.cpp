@@ -2,6 +2,9 @@
 
 #include "Weapons/NSBaseWeapon.h"
 #include "GameFramework/Character.h"
+#include "DrawDebugHelpers.h"
+#include "Player/NSBaseCharacter.h"
+#include "Engine/World.h"
 
 ANSBaseWeapon::ANSBaseWeapon()
 {
@@ -25,30 +28,12 @@ void ANSBaseWeapon::Tick(float DeltaTime)
 
 void ANSBaseWeapon::Shot()
 {
-	UE_LOG(LogTemp, Error, TEXT("shot"));
-}
+	FHitResult HitResult;
+	FVector TraceStart;
+	FVector TraceEnd;
 
-bool ANSBaseWeapon::GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
-{
-	const auto STUCharacter = Cast<ACharacter>(GetOwner());
-	if (!STUCharacter) return false;
-
-	if (STUCharacter->IsPlayerControlled())
-	{
-		const auto Controller = GetPlayerController();
-		if (!Controller) return false;
-
-		Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
-
-	}
-	else
-	{
-		ViewLocation = GetMuzzleWorldLocation();
-		ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
-	}
-
-
-	return true;
+	GetTraceData(TraceStart, TraceEnd);
+	MakeHit(HitResult, TraceStart, TraceEnd);
 }
 
 APlayerController* ANSBaseWeapon::GetPlayerController() const
@@ -62,4 +47,38 @@ APlayerController* ANSBaseWeapon::GetPlayerController() const
 FVector ANSBaseWeapon::GetMuzzleWorldLocation() const
 {
 	return WeaponMesh->GetSocketLocation(MuzzleSocketName);
+}
+
+void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
+{	
+	if (!GetOwner()) return;
+	FVector ViewLocation;
+	FRotator ViewRotation;
+
+	TraceStart = GetMuzzleWorldLocation();
+	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
+	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
+	
+}
+
+void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
+{
+	if (!GetWorld()) return;
+
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(GetOwner());
+	CollisionQueryParams.bReturnPhysicalMaterial = true;
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
+
+	if (HitResult.bBlockingHit) 
+	{	
+		if(HitResult.GetActor()->IsA<ANSBaseCharacter>()) 
+		{
+			UE_LOG(LogTemp, Error, TEXT("character"));
+			auto Character = Cast<ANSBaseCharacter>(HitResult.GetActor());
+			Character->TakeDamage(DamageGiven, FDamageEvent(), GetPlayerController(), GetOwner());
+		}
+	}
 }

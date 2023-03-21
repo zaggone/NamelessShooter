@@ -132,7 +132,7 @@ void ANSBaseCharacter::SetPawnRotationToMouse()
 	}
 
 	SetActorRotation(FRotator(GetActorRotation().Pitch, NeedToRotating.Yaw, GetActorRotation().Roll));
-	DrawDebugLine(GetWorld(), GetActorLocation(), MouseLocationByCharacter, FColor::Red, false, 0.2f);
+	//DrawDebugLine(GetWorld(), GetActorLocation(), MouseLocationByCharacter, FColor::Red, false, 0.2f);
 }
 
 APlayerController* ANSBaseCharacter::GetPlayerController()

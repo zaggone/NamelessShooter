@@ -33,9 +33,19 @@ public:
 
 	virtual void Shot();
 
-	bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1200", ClampMax = "5000"))
+	float TraceMaxDistance = 1500.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "20", ClampMax = "200"))
+	float DamageGiven = 80;
+
 	APlayerController* GetPlayerController() const;
 	FVector GetMuzzleWorldLocation() const;
+
+	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
+
+
 private:
 
 };

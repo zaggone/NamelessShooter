@@ -16,32 +16,5 @@ void ANSPlayerController::BeginPlay()
 void ANSPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (0) SetPawnRotationToMouse();
-}
 
-//устанавливаем направление перса к мышке 
-void ANSPlayerController::SetPawnRotationToMouse()
-{
-	if (!GetWorld() || !GetPawn()) return;
-	FVector MouseLocation;
-	FVector MouseDirection;
-	
-	DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
-
-	auto PawnSpringArmComponent = Cast<USpringArmComponent>(GetPawn()->GetComponentByClass(USpringArmComponent::StaticClass()));
-
-	auto WorldMouseLocation = MouseLocation + (-MouseDirection * (1170.0f/ MouseDirection.Z));
-	auto CurrentMouseLocation = FVector(WorldMouseLocation.X, WorldMouseLocation.Y, GetPawn()->GetActorLocation().Z + 50);
-
-	UE_LOG(LogTemp, Error, TEXT("loc %f, dir %f"), MouseLocation.Z, MouseDirection.Z);
-
-
-	//(если мышка ближе 120 см игнорируем)
-	if ((CurrentMouseLocation - GetPawn()->GetActorLocation()).Size() > 120.0f)
-	{
-		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetPawn()->GetActorLocation(), CurrentMouseLocation);
-	}
-	
-	GetPawn()->SetActorRotation(FRotator(GetPawn()->GetActorRotation().Pitch, NeedToRotating.Yaw, GetPawn()->GetActorRotation().Roll));
-	DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), WorldMouseLocation, FColor::Red, false, 0.2f);
 }
