@@ -13,6 +13,8 @@ class NAMELESSSHOOTER_API ANSPlayerController : public APlayerController
 public:
 
 	void SetPawnRotationToMouse();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Pawn Settings")
+	bool bRotatingPawnToMouse = true;
 
 protected:
 	virtual void BeginPlay() override;

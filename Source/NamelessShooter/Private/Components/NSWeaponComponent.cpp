@@ -25,6 +25,7 @@ void UNSWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
+
 void UNSWeaponComponent::SpawnWeapons()
 {
 	ACharacter* CurrentCharacter = Cast<ACharacter>(GetOwner());
@@ -34,8 +35,9 @@ void UNSWeaponComponent::SpawnWeapons()
 	{
 		if (OneWeaponData.Key == CurrentWeaponClass)
 		{
-			auto Weapon = GetWorld()->SpawnActor<ANSBaseWeapon>(OneWeaponData.Key);
-			AttachWeaponToSocket(Weapon, CurrentCharacter->GetMesh(), OneWeaponData.Value);
+			CurrentWeapon = GetWorld()->SpawnActor<ANSBaseWeapon>(OneWeaponData.Key);
+			CurrentWeapon->SetOwner(GetOwner());
+			AttachWeaponToSocket(CurrentWeapon, CurrentCharacter->GetMesh(), OneWeaponData.Value);
 			return;
 		}
 	}
@@ -47,4 +49,8 @@ void UNSWeaponComponent::AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneCompo
 	if (!Weapon || !SceneComponent) return;
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
+}
+void UNSWeaponComponent::Shot()
+{
+	CurrentWeapon->Shot();
 }

@@ -10,8 +10,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/NSWeaponComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
 
 ANSBaseCharacter::ANSBaseCharacter()
 {
@@ -39,7 +37,6 @@ void ANSBaseCharacter::BeginPlay()
 void ANSBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	SetPawnRotationToMouse();
 
 }
 
@@ -117,41 +114,6 @@ void ANSBaseCharacter::StopLookingAround()
 	bWantsLookAround = false;
 	SpringArmComponent->SocketOffset.Y = 0;
 	SpringArmComponent->SocketOffset.X = 0;
-}
-
-void ANSBaseCharacter::SetPawnRotationToMouse()
-{
-	if (!GetWorld()) return;
-
-	const auto MouseLocationByCharacter = GetMouseLocationByCharacter();
-
-	//(если мышка ближе 120 см игнорируем)
-	if ((FVector(MouseLocationByCharacter.X, MouseLocationByCharacter.Y, 0.0f) - FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f)).Size() > 120.0f)
-	{
-		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), MouseLocationByCharacter);
-	}
-
-	SetActorRotation(FRotator(GetActorRotation().Pitch, NeedToRotating.Yaw, GetActorRotation().Roll));
-	DrawDebugLine(GetWorld(), GetActorLocation(), MouseLocationByCharacter, FColor::Red, false, 0.2f);
-}
-
-APlayerController* ANSBaseCharacter::GetPlayerController()
-{
-	return Cast<APlayerController>(Controller);
-
-}
-
-FVector ANSBaseCharacter::GetMouseLocationByCharacter()
-{
-	const auto PlayerController = GetPlayerController();
-	if (!PlayerController) return FVector();
-
-	FVector MouseLocation;
-	FVector MouseDirection;
-
-	PlayerController->DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
-
-	return MouseLocation + (MouseDirection * (SpringArmComponent->SocketOffset.Z - 30.0f / MouseDirection.Z));
 }
 
 // обзор по оси y

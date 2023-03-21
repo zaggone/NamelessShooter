@@ -56,11 +56,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 	float CameraLookoutVelocity = 5.0f;
 
-	void SetPawnRotationToMouse();
 
-	APlayerController* GetPlayerController();
-
-	FVector GetMouseLocationByCharacter();
 
 private:
 
@@ -73,6 +69,4 @@ private:
 	void LookAcross(float Amount);
 
 	void Shot();
-
-	FRotator NeedToRotating;
 };

@@ -30,6 +30,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	USceneComponent* GetMesh() const { return WeaponMesh; }
+
+	virtual void Shot();
+
+	bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
+	APlayerController* GetPlayerController() const;
+	FVector GetMuzzleWorldLocation() const;
 private:
 
 };

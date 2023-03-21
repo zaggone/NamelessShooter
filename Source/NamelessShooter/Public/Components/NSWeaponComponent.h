@@ -30,8 +30,13 @@ protected:
 public:	
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void Shot();
 
 private:
+
+	ANSBaseWeapon* CurrentWeapon;
+
 	void SpawnWeapons();
 
 	void AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
