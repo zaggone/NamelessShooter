@@ -8,6 +8,31 @@
 
 class ANSBaseWeapon;
 
+USTRUCT(BlueprintType)
+struct FWeaponData
+{
+public:
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<ANSBaseWeapon> WeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	UAnimMontage* ReloadAnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	FName WeaponSocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<UAnimInstance> AnimInstanceClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	bool bNeedProjectileSocket = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bNeedProjectileSocket"))
+	FName ProjectileSocketName;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NAMELESSSHOOTER_API UNSWeaponComponent : public UActorComponent
 {
@@ -19,11 +44,14 @@ public:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	bool bArmed = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bArmed"))
 	TSubclassOf<ANSBaseWeapon> CurrentWeaponClass;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-	TMap<TSubclassOf<ANSBaseWeapon>, FName> SocketsForWeapons;
+	TArray<FWeaponData> WeaponsData;
 
 	virtual void BeginPlay() override;
 
@@ -34,6 +62,9 @@ public:
 	void Shot();
 	
 	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<UAnimInstance> GetCurrentAnimInstanceClass();
 
 private:
 

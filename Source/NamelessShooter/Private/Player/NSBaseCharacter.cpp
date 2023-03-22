@@ -20,20 +20,28 @@ ANSBaseCharacter::ANSBaseCharacter()
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->bUsePawnControlRotation = true;
+	SpringArmComponent->TargetArmLength = 0.0f;
+	SpringArmComponent->SocketOffset.Z = 1000.0f;
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
+	CameraComponent->SetWorldRotation(FRotator(0.0f, 0.0f, -90.0f));
 
 	HealthComponent = CreateDefaultSubobject<UNSHealthComponent>("HealthComponent");
 	WeaponComponent = CreateDefaultSubobject<UNSWeaponComponent>("WeaponComponent");
+
+	bUseControllerRotationYaw = false;
 }
 
 void ANSBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	check(WeaponComponent);
+	check(HealthComponent);
+	
 	HealthComponent->OnDeath.AddUObject(this, &ANSBaseCharacter::OnDeath);
 	HealthComponent->OnHealthChanged.AddUObject(this, &ANSBaseCharacter::OnHealthChanged);
+
 }
 
 void ANSBaseCharacter::Tick(float DeltaTime)
@@ -90,7 +98,6 @@ void ANSBaseCharacter::OnDeath()
 	SetLifeSpan(5.0f);
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	//WeaponComponent->StopFire();
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetSimulatePhysics(true);
@@ -108,7 +115,6 @@ void ANSBaseCharacter::StartLookingAround()
 {	
 	UE_LOG(LogTemp, Error, TEXT("start"))
 	bWantsLookAround = true;
-
 }
 
 // колл бек на конец обзора окружения
@@ -120,13 +126,14 @@ void ANSBaseCharacter::StopLookingAround()
 	SpringArmComponent->SocketOffset.X = 0;
 }
 
+// вращаем перса к мышке 
 void ANSBaseCharacter::SetPawnRotationToMouse()
 {
 	if (!GetWorld()) return;
 
 	const auto MouseLocationByCharacter = GetMouseLocationByCharacter();
 
-	//(если мышка ближе 120 см игнорируем)
+	//(если мышка ближе 120 см к персу то игнорируем)
 	if ((FVector(MouseLocationByCharacter.X, MouseLocationByCharacter.Y, 0.0f) - FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f)).Size() > 120.0f)
 	{
 		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), MouseLocationByCharacter);
@@ -135,13 +142,13 @@ void ANSBaseCharacter::SetPawnRotationToMouse()
 	SetActorRotation(FRotator(GetActorRotation().Pitch, NeedToRotating.Yaw, GetActorRotation().Roll));
 	//DrawDebugLine(GetWorld(), GetActorLocation(), MouseLocationByCharacter, FColor::Red, false, 0.2f);
 }
-
+// геттеер player controller
 APlayerController* ANSBaseCharacter::GetPlayerController()
 {
 	return Cast<APlayerController>(Controller);
 
 }
-
+// получаем корды мышки в мире относительно персонажа (чутка костыльно)
 FVector ANSBaseCharacter::GetMouseLocationByCharacter()
 {
 	const auto PlayerController = GetPlayerController();
@@ -151,7 +158,7 @@ FVector ANSBaseCharacter::GetMouseLocationByCharacter()
 	FVector MouseDirection;
 
 	PlayerController->DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
-
+	
 	return MouseLocation + (MouseDirection * (SpringArmComponent->SocketOffset.Z - 30.0f / MouseDirection.Z));
 }
 
@@ -168,13 +175,15 @@ void ANSBaseCharacter::LookAcross(float Amount)
 	if (!bWantsLookAround || Amount == 0) return;
 	SpringArmComponent->SocketOffset.X += CameraLookoutVelocity * Amount;
 }
-
+// на выстрел
 void ANSBaseCharacter::Shot()
 {
+	if (bAnimMontageInProgress) return;
 	WeaponComponent->Shot();
 }
-
+// перезарядка
 void ANSBaseCharacter::WeaponReload()
 {
+	if (bAnimMontageInProgress) return;
 	WeaponComponent->Reload();
 }

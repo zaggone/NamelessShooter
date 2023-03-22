@@ -30,7 +30,6 @@ void UNSHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, con
 {
 	if ((Damage <= 0.0f) || IsDead() || !GetOwner()) return;
 	SetHealth(Health - Damage);
-	UE_LOG(LogTemp, Error, TEXT("%f"), Health);
 	if (IsDead())
 	{
 		OnDeath.Broadcast();

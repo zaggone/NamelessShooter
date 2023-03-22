@@ -48,6 +48,8 @@ public:
 	
 	void Reload();
 
+	bool MayReload();
+
 private:
 
 	APlayerController* GetPlayerController() const;

@@ -26,17 +26,20 @@ void ANSBaseWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+// вызывается когда выстреливаем
 void ANSBaseWeapon::Shot()
 {
-	if (!GetOwner()) return;
+	if (!GetOwner() || !GetWorld()) return;
 	FHitResult HitResult;
 	FVector TraceStart;
 	FVector TraceEnd;
 
 	GetTraceData(TraceStart, TraceEnd);
+
 	MakeHit(HitResult, TraceStart, TraceEnd);
 }
 
+// геттер player controller
 APlayerController* ANSBaseWeapon::GetPlayerController() const
 {
 	const auto Player = Cast<ACharacter>(GetOwner());
@@ -45,11 +48,13 @@ APlayerController* ANSBaseWeapon::GetPlayerController() const
 	return Player->GetController<APlayerController>();
 }
 
+// получаем координаты дула оружия
 FVector ANSBaseWeapon::GetMuzzleWorldLocation() const
 {
 	return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
+// метод получения инфы для трейса (начало / конец)
 void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 {	
 	if (!GetOwner()) return;
@@ -60,7 +65,7 @@ void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
 	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
 }
-
+// делаем line trace и получаем инфу о попадании, в зависимости от того куда попали наносим урон.
 void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
 	if (!GetWorld() || CurrentBulletInClipNum == 0) return;
@@ -82,12 +87,18 @@ void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 	}
 
 	CurrentBulletInClipNum--;
+	if (CurrentBulletInClipNum == 0 && MayReload()) 
+	{
+		auto Character = Cast<ANSBaseCharacter>(GetOwner());
+		Character->WeaponReload();
+	}
+	//UE_LOG(LogTemp, Error, TEXT("all %i   in clip %i   max in clip %i"), CurrentBulletsNum, CurrentBulletInClipNum, MaxBulletsInClipNum);
 }
 
 // перезарядка оружия
 void ANSBaseWeapon::Reload()
 {
-	if (!GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum) return;
+	if (!MayReload()) return;
 
 	if (CurrentBulletsNum - (MaxBulletsInClipNum - CurrentBulletInClipNum) >= 0)
 	{	
@@ -99,4 +110,10 @@ void ANSBaseWeapon::Reload()
 		CurrentBulletInClipNum = CurrentBulletsNum;
 		CurrentBulletsNum = 0;
 	}
+	UE_LOG(LogTemp, Error, TEXT("all %i   in clip %i   max in clip %i"), CurrentBulletsNum, CurrentBulletInClipNum, MaxBulletsInClipNum);
+}
+
+bool ANSBaseWeapon::MayReload()
+{
+	return !(!GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);
 }

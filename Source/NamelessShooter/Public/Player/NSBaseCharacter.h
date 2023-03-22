@@ -35,7 +35,13 @@ public:
 
 protected:
 
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() override;	
+
+	void OnDeath();
+
+	void OnHealthChanged(float Health, float DeltaHealth);
+
+	void StartLookingAround();
 
 public:	
 
@@ -46,21 +52,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
 
-	void OnDeath();
 
-	void OnHealthChanged(float Health, float DeltaHealth);
-
-	void StartLookingAround();
 	void StopLookingAround();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
-	float CameraLookoutVelocity = 5.0f;
+	float CameraLookoutVelocity = 20.0f;
 
 	void SetPawnRotationToMouse();
 
 	APlayerController* GetPlayerController();
 
 	FVector GetMouseLocationByCharacter();
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bAnimMontageInProgress = false;
+
+	void WeaponReload();
 
 private:
 
@@ -73,8 +80,6 @@ private:
 	void LookAcross(float Amount);
 
 	void Shot();
-
-	void WeaponReload();
 
 	FRotator NeedToRotating;
 };
