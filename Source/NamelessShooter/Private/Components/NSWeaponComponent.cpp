@@ -35,8 +35,9 @@ void UNSWeaponComponent::SpawnWeapons()
 	{
 		if (OneWeaponData.Key == CurrentWeaponClass)
 		{
-			CurrentWeapon = GetWorld()->SpawnActor<ANSBaseWeapon>(OneWeaponData.Key);
-			CurrentWeapon->SetOwner(GetOwner());
+			CurrentWeapon = GetWorld()->SpawnActorDeferred<ANSBaseWeapon>(OneWeaponData.Key, FTransform(), GetOwner());
+			//CurrentWeapon->SetOwner(GetOwner());
+			CurrentWeapon->FinishSpawning(FTransform());
 			AttachWeaponToSocket(CurrentWeapon, CurrentCharacter->GetMesh(), OneWeaponData.Value);
 			return;
 		}
@@ -53,4 +54,9 @@ void UNSWeaponComponent::AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneCompo
 void UNSWeaponComponent::Shot()
 {
 	CurrentWeapon->Shot();
+}
+
+void UNSWeaponComponent::Reload()
+{
+	CurrentWeapon->Reload();
 }

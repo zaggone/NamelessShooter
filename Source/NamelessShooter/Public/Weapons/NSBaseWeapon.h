@@ -27,11 +27,10 @@ protected:
 	FName MuzzleSocketName;
 
 public:	
+
 	virtual void Tick(float DeltaTime) override;
 
 	USceneComponent* GetMesh() const { return WeaponMesh; }
-
-	virtual void Shot();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1200", ClampMax = "5000"))
 	float TraceMaxDistance = 1500.0f;
@@ -39,13 +38,25 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "20", ClampMax = "200"))
 	float DamageGiven = 80;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1", ClampMax = "200"))
+	int32 MaxBulletsInClipNum = 6;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (ClampMin = "1", ClampMax = "10000"))
+	int32 BulletsNum = 50.0f;
+	
+	virtual void Shot();
+	
+	void Reload();
+
+private:
+
 	APlayerController* GetPlayerController() const;
 	FVector GetMuzzleWorldLocation() const;
 
 	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
 	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
 
-
-private:
+	int32 CurrentBulletInClipNum;
+	int32 CurrentBulletsNum;
 
 };

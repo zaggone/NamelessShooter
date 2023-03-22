@@ -74,5 +74,7 @@ private:
 
 	void Shot();
 
+	void WeaponReload();
+
 	FRotator NeedToRotating;
 };

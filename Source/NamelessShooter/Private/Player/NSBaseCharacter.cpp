@@ -56,6 +56,7 @@ void ANSBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("WantsToLookAround", IE_Pressed, this, &ANSBaseCharacter::StartLookingAround);
 	PlayerInputComponent->BindAction("WantsToLookAround", IE_Released, this, &ANSBaseCharacter::StopLookingAround);
 	PlayerInputComponent->BindAction("Shot", IE_Pressed, this, &ANSBaseCharacter::Shot);
+	PlayerInputComponent->BindAction("WeaponReload", IE_Pressed, this, &ANSBaseCharacter::WeaponReload);
 }
 
 // колл бек функция на движение вдоль (кнопка W и S)
@@ -171,4 +172,9 @@ void ANSBaseCharacter::LookAcross(float Amount)
 void ANSBaseCharacter::Shot()
 {
 	WeaponComponent->Shot();
+}
+
+void ANSBaseCharacter::WeaponReload()
+{
+	WeaponComponent->Reload();
 }

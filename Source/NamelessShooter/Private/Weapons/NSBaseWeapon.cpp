@@ -17,17 +17,18 @@ ANSBaseWeapon::ANSBaseWeapon()
 void ANSBaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	CurrentBulletsNum = BulletsNum;
+	Reload();
 }
 
 void ANSBaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ANSBaseWeapon::Shot()
 {
+	if (!GetOwner()) return;
 	FHitResult HitResult;
 	FVector TraceStart;
 	FVector TraceEnd;
@@ -58,12 +59,11 @@ void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 	TraceStart = GetMuzzleWorldLocation();
 	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
 	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
-	
 }
 
 void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
-	if (!GetWorld()) return;
+	if (!GetWorld() || CurrentBulletInClipNum == 0) return;
 
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(GetOwner());
@@ -76,9 +76,27 @@ void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 	{	
 		if(HitResult.GetActor()->IsA<ANSBaseCharacter>()) 
 		{
-			UE_LOG(LogTemp, Error, TEXT("character"));
 			auto Character = Cast<ANSBaseCharacter>(HitResult.GetActor());
 			Character->TakeDamage(DamageGiven, FDamageEvent(), GetPlayerController(), GetOwner());
 		}
+	}
+
+	CurrentBulletInClipNum--;
+}
+
+// перезарядка оружия
+void ANSBaseWeapon::Reload()
+{
+	if (!GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum) return;
+
+	if (CurrentBulletsNum - (MaxBulletsInClipNum - CurrentBulletInClipNum) >= 0)
+	{	
+		CurrentBulletsNum = CurrentBulletsNum - (MaxBulletsInClipNum - CurrentBulletInClipNum);
+		CurrentBulletInClipNum = MaxBulletsInClipNum;
+	}
+	else 
+	{
+		CurrentBulletInClipNum = CurrentBulletsNum;
+		CurrentBulletsNum = 0;
 	}
 }
