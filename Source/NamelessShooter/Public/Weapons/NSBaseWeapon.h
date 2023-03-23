@@ -30,6 +30,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
 	USceneComponent* GetMesh() const { return WeaponMesh; }
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1200", ClampMax = "5000"))
@@ -41,7 +42,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1", ClampMax = "200"))
 	int32 MaxBulletsInClipNum = 6;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (ClampMin = "1", ClampMax = "10000"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1", ClampMax = "10000"))
 	int32 BulletsNum = 50.0f;
 	
 	virtual void Shot();
@@ -50,6 +51,9 @@ public:
 
 	bool MayReload();
 
+	virtual bool StartAim() { return false; }
+
+	virtual bool StopAim() { return false; }
 private:
 
 	APlayerController* GetPlayerController() const;

@@ -63,7 +63,7 @@ void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 
 	TraceStart = GetMuzzleWorldLocation();
 	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
-	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
+	TraceEnd = GetOwner()->GetActorLocation() + ShootDirection * TraceMaxDistance;
 }
 // делаем line trace и получаем инфу о попадании, в зависимости от того куда попали наносим урон.
 void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)

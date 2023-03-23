@@ -31,6 +31,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bNeedProjectileSocket"))
 	FName ProjectileSocketName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	bool bNeedAimAnimMontage = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bNeedAimAnimMontage"))
+	UAnimMontage* AimAnimMontage;
+
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -66,7 +73,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<UAnimInstance> GetCurrentAnimInstanceClass();
 
+	void StartAim();
+
+	void StopAim();
+
 private:
+
+	FWeaponData* GetCurrentWeaponData();
 
 	ANSBaseWeapon* CurrentWeapon;
 

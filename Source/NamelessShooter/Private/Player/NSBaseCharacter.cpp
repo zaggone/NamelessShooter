@@ -109,34 +109,18 @@ void ANSBaseCharacter::OnHealthChanged(float Health, float DeltaHealth)
 	
 
 }
-
-// колл бек на начало обзора окружения
-void ANSBaseCharacter::StartLookingAround()
-{	
-	UE_LOG(LogTemp, Error, TEXT("start"))
-	bWantsLookAround = true;
-}
-
-// колл бек на конец обзора окружения
-void ANSBaseCharacter::StopLookingAround()
-{
-	UE_LOG(LogTemp, Error, TEXT("stop"))
-	bWantsLookAround = false;
-	SpringArmComponent->SocketOffset.Y = 0;
-	SpringArmComponent->SocketOffset.X = 0;
-}
-
 // вращаем перса к мышке 
 void ANSBaseCharacter::SetPawnRotationToMouse()
 {
 	if (!GetWorld()) return;
 
 	const auto MouseLocationByCharacter = GetMouseLocationByCharacter();
-
+	const auto ActorXYVec = FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f);
+	const auto MouseXYVec = FVector(MouseLocationByCharacter.X, MouseLocationByCharacter.Y, 0.0f);
 	//(если мышка ближе 120 см к персу то игнорируем)
-	if ((FVector(MouseLocationByCharacter.X, MouseLocationByCharacter.Y, 0.0f) - FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f)).Size() > 120.0f)
+	if ((MouseXYVec - ActorXYVec).Size() > 120.0f)
 	{
-		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), MouseLocationByCharacter);
+		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(ActorXYVec, MouseXYVec);
 	}
 
 	SetActorRotation(FRotator(GetActorRotation().Pitch, NeedToRotating.Yaw, GetActorRotation().Roll));
@@ -158,8 +142,29 @@ FVector ANSBaseCharacter::GetMouseLocationByCharacter()
 	FVector MouseDirection;
 
 	PlayerController->DeprojectMousePositionToWorld(MouseLocation, MouseDirection);
-	
-	return MouseLocation + (MouseDirection * (SpringArmComponent->SocketOffset.Z - 30.0f / MouseDirection.Z));
+	const auto CurrentCos = FVector::DotProduct(FVector(0.0f, 0.0f,-1.0f), MouseDirection);
+	const auto CurrentMouseWorldLocation = MouseLocation + MouseDirection * ((SpringArmComponent->SocketOffset.Z - 20.0f) / CurrentCos);
+
+	return CurrentMouseWorldLocation;
+}
+// колл бек на начало обзора окружения
+void ANSBaseCharacter::StartLookingAround()
+{	
+	bWantsLookAround = true;
+
+	if (bReloadAnimMontageInProgress) return;
+	WeaponComponent->StartAim();
+}
+
+// колл бек на конец обзора окружения
+void ANSBaseCharacter::StopLookingAround()
+{
+	bWantsLookAround = false;
+	SpringArmComponent->SocketOffset.Y = 0;
+	SpringArmComponent->SocketOffset.X = 0;
+
+	if (bReloadAnimMontageInProgress) return;
+	WeaponComponent->StopAim();
 }
 
 // обзор по оси y
@@ -178,12 +183,12 @@ void ANSBaseCharacter::LookAcross(float Amount)
 // на выстрел
 void ANSBaseCharacter::Shot()
 {
-	if (bAnimMontageInProgress) return;
+	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Shot();
 }
 // перезарядка
 void ANSBaseCharacter::WeaponReload()
 {
-	if (bAnimMontageInProgress) return;
+	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Reload();
 }

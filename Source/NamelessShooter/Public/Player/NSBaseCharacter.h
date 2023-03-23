@@ -52,7 +52,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
 
-
 	void StopLookingAround();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
@@ -65,7 +64,7 @@ public:
 	FVector GetMouseLocationByCharacter();
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bAnimMontageInProgress = false;
+	bool bReloadAnimMontageInProgress = false;
 
 	void WeaponReload();
 

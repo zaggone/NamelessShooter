@@ -3,6 +3,7 @@
 #include "Components/NSWeaponComponent.h"
 #include "Weapons/NSBaseWeapon.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
@@ -17,6 +18,7 @@ void UNSWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	check(GetOwner())
 	if (bArmed) 
 	{
 		check(CurrentWeaponClass); // не указан класс оружия (ненада так).. либо поставь bArmed в false
@@ -33,7 +35,7 @@ void UNSWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 void UNSWeaponComponent::SpawnWeapons()
 {
-	if (!GetOwner() || !bArmed) return;
+	if (!bArmed) return;
 	ACharacter* CurrentCharacter = Cast<ACharacter>(GetOwner());
 	if (!CurrentCharacter || !GetWorld()) return;
 
@@ -58,24 +60,60 @@ void UNSWeaponComponent::AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneCompo
 }
 void UNSWeaponComponent::Shot()
 {
-	if (!bArmed) return;
+	if (!bArmed || !CurrentWeapon) return;
 	CurrentWeapon->Shot();
 }
 
 void UNSWeaponComponent::Reload()
 {
-	if (!GetOwner() || !bArmed || !CurrentWeapon->MayReload()) return;
+	if (!bArmed || !CurrentWeapon ||!CurrentWeapon->MayReload()) return;
 	const auto Character = Cast<ACharacter>(GetOwner());
-	const auto CurrentWeaponData = WeaponsData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); });
+	const auto CurrentWeaponData = GetCurrentWeaponData();
+
+	if (!CurrentWeaponData->ReloadAnimMontage) checkNoEntry();
 	Character->PlayAnimMontage(CurrentWeaponData->ReloadAnimMontage);
 	CurrentWeapon->Reload();
 }
 
 TSubclassOf<UAnimInstance> UNSWeaponComponent::GetCurrentAnimInstanceClass()
 {
-	if (!GetOwner() || !bArmed) return TSubclassOf<UAnimInstance>();
-	const auto CurrentWeaponData = WeaponsData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); });
-	if(!CurrentWeaponData || !CurrentWeaponData->AnimInstanceClass)  checkNoEntry() // не найдено оружие или anim instance оружия
+	if (!bArmed || !CurrentWeapon) checkNoEntry(); // какого хера функция тогда вообще была вызвана а?
+	const auto CurrentWeaponData = GetCurrentWeaponData();
+	if (!CurrentWeaponData || !CurrentWeaponData->AnimInstanceClass)  checkNoEntry(); // не найдено оружие или anim instance оружия
 	return CurrentWeaponData->AnimInstanceClass;
+}
+
+void UNSWeaponComponent::StartAim()
+{ 
+	if (!CurrentWeapon) return;
+
+	if (CurrentWeapon->StartAim()) 
+	{
+		const auto Character = Cast<ACharacter>(GetOwner());
+		const auto CurrentWeaponData = GetCurrentWeaponData();
+		if (!CurrentWeaponData->bNeedAimAnimMontage || !CurrentWeaponData->AimAnimMontage) checkNoEntry(); // скорее всего не установлен AimAnimMontage
+		Character->PlayAnimMontage(CurrentWeaponData->AimAnimMontage);
+		Character->GetCharacterMovement()->MaxWalkSpeed = 400;
+	}
+}
+
+void UNSWeaponComponent::StopAim()
+{
+	if (!CurrentWeapon) return;
+
+	if(CurrentWeapon->StopAim()) 
+	{
+		const auto Character = Cast<ACharacter>(GetOwner());
+		const auto CurrentWeaponData = GetCurrentWeaponData();
+		if (!CurrentWeaponData->bNeedAimAnimMontage || !CurrentWeaponData->AimAnimMontage) checkNoEntry(); // скорее всего не установлен AimAnimMontage
+		Character->StopAnimMontage(CurrentWeaponData->AimAnimMontage);
+		Character->GetCharacterMovement()->MaxWalkSpeed = 500;
+	}
+}
+
+FWeaponData* UNSWeaponComponent::GetCurrentWeaponData()
+{
+	if (!CurrentWeapon || WeaponsData.Num() == 0) checkNoEntry(); // чета с оружием или WeaponData-ой :-|
+	return WeaponsData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); });
 }
 

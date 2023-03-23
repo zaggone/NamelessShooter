@@ -19,8 +19,15 @@ public:
 
 protected:
 
+	virtual bool StartAim() override;
+	virtual bool StopAim() override;
+	virtual void Shot() override;
 
-public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
+	TSubclassOf<UAnimInstance> BowAnimInstance;
 
+private:
+
+	bool CanShot = false;
 
 };
