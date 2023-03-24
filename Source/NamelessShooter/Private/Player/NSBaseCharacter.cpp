@@ -11,7 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/NSWeaponComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
+#include "Weapons/NSBaseWeapon.h"
 
 ANSBaseCharacter::ANSBaseCharacter()
 {
@@ -152,7 +152,7 @@ void ANSBaseCharacter::StartLookingAround()
 {	
 	bWantsLookAround = true;
 
-	if (bReloadAnimMontageInProgress) return;
+	//if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->StartAim();
 }
 
@@ -163,7 +163,7 @@ void ANSBaseCharacter::StopLookingAround()
 	SpringArmComponent->SocketOffset.Y = 0;
 	SpringArmComponent->SocketOffset.X = 0;
 
-	if (bReloadAnimMontageInProgress) return;
+	//if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->StopAim();
 }
 
@@ -171,6 +171,12 @@ void ANSBaseCharacter::StopLookingAround()
 void ANSBaseCharacter::LookAlong(float Amount)
 {
 	if (!bWantsLookAround || Amount == 0) return;
+
+	// если больше заданной дистанции то игнорим
+	if (FMath::Abs(SpringArmComponent->SocketOffset.Y + CameraLookoutVelocity * Amount) >= MaxCameraLookoutDistance)
+	{
+		return;
+	}
 	SpringArmComponent->SocketOffset.Y += CameraLookoutVelocity * Amount;
 }
 
@@ -178,6 +184,13 @@ void ANSBaseCharacter::LookAlong(float Amount)
 void ANSBaseCharacter::LookAcross(float Amount)
 {
 	if (!bWantsLookAround || Amount == 0) return;
+
+	// если больше заданной дистанции то игнорим
+	if (FMath::Abs(SpringArmComponent->SocketOffset.X + CameraLookoutVelocity * Amount) >= MaxCameraLookoutDistance)
+	{
+		return;
+	}
+
 	SpringArmComponent->SocketOffset.X += CameraLookoutVelocity * Amount;
 }
 // на выстрел
@@ -191,4 +204,9 @@ void ANSBaseCharacter::WeaponReload()
 {
 	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Reload();
+}
+
+ANSBaseWeapon* ANSBaseCharacter::GetCurrentWeapon() const
+{
+	return WeaponComponent->GetCurrentWeapon(); 
 }

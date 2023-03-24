@@ -47,20 +47,27 @@ public:
 	
 	virtual void Shot();
 	
-	void Reload();
-
-	bool MayReload();
+	virtual void Reload();
 
 	virtual bool StartAim() { return false; }
 
 	virtual bool StopAim() { return false; }
-private:
+	virtual bool MayReload();
 
+	virtual void SetProjectileSocketName(FName Name) { return; }
+
+protected:
+	
+	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+
+	void GetHitResult(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
+
+	virtual void MakeHit(FHitResult& HitResult, const FVector& TraceEnd);
+	
 	APlayerController* GetPlayerController() const;
 	FVector GetMuzzleWorldLocation() const;
 
-	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
-	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
+private:
 
 	int32 CurrentBulletInClipNum;
 	int32 CurrentBulletsNum;

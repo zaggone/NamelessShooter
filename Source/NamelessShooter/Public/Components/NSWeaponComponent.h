@@ -73,9 +73,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<UAnimInstance> GetCurrentAnimInstanceClass();
 
+	UFUNCTION(BlueprintCallable)
 	void StartAim();
 
 	void StopAim();
+
+	ANSBaseWeapon* GetCurrentWeapon() const { return bArmed ? CurrentWeapon : nullptr; }
 
 private:
 
@@ -84,7 +87,5 @@ private:
 	ANSBaseWeapon* CurrentWeapon;
 
 	void SpawnWeapons();
-
-	void AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
 	
 };

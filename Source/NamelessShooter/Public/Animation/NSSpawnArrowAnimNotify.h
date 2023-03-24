@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Animation/NSBaseAnimNotify.h"
-#include "NSReloadAnimNotify.generated.h"
+#include "NSSpawnArrowAnimNotify.generated.h"
 
 UCLASS()
-class NAMELESSSHOOTER_API UNSReloadAnimNotify : public UNSBaseAnimNotify
+class NAMELESSSHOOTER_API UNSSpawnArrowAnimNotify : public UNSBaseAnimNotify
 {
 	GENERATED_BODY()
 	

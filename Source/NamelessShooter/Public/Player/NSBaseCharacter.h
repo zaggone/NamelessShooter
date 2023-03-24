@@ -10,6 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UNSHealthComponent;
 class UNSWeaponComponent;
+class ANSBaseWeapon;
 
 UCLASS()
 class NAMELESSSHOOTER_API ANSBaseCharacter : public ACharacter
@@ -54,8 +55,11 @@ public:
 
 	void StopLookingAround();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "5.0", ClampMax = "2000.0"))
 	float CameraLookoutVelocity = 20.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "1000.0", ClampMax = "10000.0"))
+	float MaxCameraLookoutDistance = 2000.0f;
 
 	void SetPawnRotationToMouse();
 
@@ -67,6 +71,12 @@ public:
 	bool bReloadAnimMontageInProgress = false;
 
 	void WeaponReload();
+
+	UFUNCTION(BlueprintCallable)
+	bool WantsLookAround() { return bWantsLookAround; }
+
+	UFUNCTION(BlueprintCallable)
+	ANSBaseWeapon* GetCurrentWeapon() const;
 
 private:
 

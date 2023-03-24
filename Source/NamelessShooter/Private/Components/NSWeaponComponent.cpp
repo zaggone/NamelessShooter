@@ -4,6 +4,8 @@
 #include "Weapons/NSBaseWeapon.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Player/NSBaseCharacter.h"
+#include "NSUtils.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
@@ -24,7 +26,6 @@ void UNSWeaponComponent::BeginPlay()
 		check(CurrentWeaponClass); // не указан класс оружия (ненада так).. либо поставь bArmed в false
 		SpawnWeapons();
 	}
-	
 }
 
 void UNSWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -44,20 +45,16 @@ void UNSWeaponComponent::SpawnWeapons()
 		if (WeaponData.WeaponClass == CurrentWeaponClass)
 		{
 			CurrentWeapon = GetWorld()->SpawnActorDeferred<ANSBaseWeapon>(WeaponData.WeaponClass, FTransform(), GetOwner());
+
+			if (WeaponData.bNeedProjectileSocket) CurrentWeapon->SetProjectileSocketName(WeaponData.ProjectileSocketName);
 			CurrentWeapon->FinishSpawning(FTransform());
-			AttachWeaponToSocket(CurrentWeapon, CurrentCharacter->GetMesh(), WeaponData.WeaponSocketName);
+			NSUtils::AttachToSocket(CurrentWeapon, CurrentCharacter->GetMesh(), WeaponData.WeaponSocketName);
 			return;
 		}
 	}
 	UE_LOG(LogWeaponComponent, Error, TEXT("No Weapon To Spawn"));
 }
 
-void UNSWeaponComponent::AttachWeaponToSocket(ANSBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName)
-{
-	if (!Weapon || !SceneComponent || !bArmed) return;
-	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
-	Weapon->AttachToComponent(SceneComponent, AttachmentRules, SocketName);
-}
 void UNSWeaponComponent::Shot()
 {
 	if (!bArmed || !CurrentWeapon) return;
@@ -73,6 +70,7 @@ void UNSWeaponComponent::Reload()
 	if (!CurrentWeaponData->ReloadAnimMontage) checkNoEntry();
 	Character->PlayAnimMontage(CurrentWeaponData->ReloadAnimMontage);
 	CurrentWeapon->Reload();
+	StopAim();
 }
 
 TSubclassOf<UAnimInstance> UNSWeaponComponent::GetCurrentAnimInstanceClass()

@@ -9,8 +9,8 @@
 void ANSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	//SetInputMode(FInputModeGameOnly());
-	bShowMouseCursor = true;
+	SetInputMode(FInputModeGameOnly());
+	//bShowMouseCursor = true;
 }
 
 void ANSPlayerController::Tick(float DeltaTime)

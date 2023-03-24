@@ -16,6 +16,7 @@ ANSBaseWeapon::ANSBaseWeapon()
 
 void ANSBaseWeapon::BeginPlay()
 {
+	UE_LOG(LogTemp, Error, TEXT("9"));
 	Super::BeginPlay();
 	CurrentBulletsNum = BulletsNum;
 	Reload();
@@ -36,12 +37,22 @@ void ANSBaseWeapon::Shot()
 
 	GetTraceData(TraceStart, TraceEnd);
 
-	MakeHit(HitResult, TraceStart, TraceEnd);
+	GetHitResult(HitResult, TraceStart, TraceEnd);
+
+	MakeHit(HitResult, TraceEnd);
+
+	CurrentBulletInClipNum--;
+	if (CurrentBulletInClipNum == 0 && MayReload())
+	{
+		auto Character = Cast<ANSBaseCharacter>(GetOwner());
+		Character->WeaponReload();
+	}
 }
 
 // геттер player controller
 APlayerController* ANSBaseWeapon::GetPlayerController() const
 {
+	//if (!GetOwner() || !GetWorld()) return &APlayerController();
 	const auto Player = Cast<ACharacter>(GetOwner());
 	if (!Player) return nullptr;
 
@@ -51,13 +62,14 @@ APlayerController* ANSBaseWeapon::GetPlayerController() const
 // получаем координаты дула оружия
 FVector ANSBaseWeapon::GetMuzzleWorldLocation() const
 {
+	//if (!GetOwner() || !GetWorld()) return;
 	return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
 // метод получения инфы для трейса (начало / конец)
 void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 {	
-	if (!GetOwner()) return;
+	if (!GetOwner() || !GetWorld()) return;
 	FVector ViewLocation;
 	FRotator ViewRotation;
 
@@ -65,34 +77,31 @@ void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
 	TraceEnd = GetOwner()->GetActorLocation() + ShootDirection * TraceMaxDistance;
 }
+
 // делаем line trace и получаем инфу о попадании, в зависимости от того куда попали наносим урон.
-void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
+void ANSBaseWeapon::GetHitResult(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
-	if (!GetWorld() || CurrentBulletInClipNum == 0) return;
+	if (!GetOwner() || !GetWorld() || CurrentBulletInClipNum == 0) return;
 
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(GetOwner());
 	CollisionQueryParams.bReturnPhysicalMaterial = true;
 
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
+	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
+}
 
-	if (HitResult.bBlockingHit) 
-	{	
-		if(HitResult.GetActor()->IsA<ANSBaseCharacter>()) 
+void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceEnd)
+{
+	if (!GetOwner() || !GetWorld()) return;
+	if (HitResult.bBlockingHit)
+	{
+		if (HitResult.GetActor()->IsA<ANSBaseCharacter>())
 		{
 			auto Character = Cast<ANSBaseCharacter>(HitResult.GetActor());
 			Character->TakeDamage(DamageGiven, FDamageEvent(), GetPlayerController(), GetOwner());
 		}
 	}
-
-	CurrentBulletInClipNum--;
-	if (CurrentBulletInClipNum == 0 && MayReload()) 
-	{
-		auto Character = Cast<ANSBaseCharacter>(GetOwner());
-		Character->WeaponReload();
-	}
-	//UE_LOG(LogTemp, Error, TEXT("all %i   in clip %i   max in clip %i"), CurrentBulletsNum, CurrentBulletInClipNum, MaxBulletsInClipNum);
 }
 
 // перезарядка оружия
@@ -110,10 +119,9 @@ void ANSBaseWeapon::Reload()
 		CurrentBulletInClipNum = CurrentBulletsNum;
 		CurrentBulletsNum = 0;
 	}
-	UE_LOG(LogTemp, Error, TEXT("all %i   in clip %i   max in clip %i"), CurrentBulletsNum, CurrentBulletInClipNum, MaxBulletsInClipNum);
 }
 
 bool ANSBaseWeapon::MayReload()
 {
-	return !(!GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);
+	return !(!GetWorld() || !GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);
 }

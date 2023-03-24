@@ -2,6 +2,10 @@
 
 
 #include "Weapons/NSBow.h"
+#include "Weapons/NSArrow.h"
+#include "NSUtils.h"
+#include "Player/NSBaseCharacter.h"
+#include "DrawDebugHelpers.h"
 
 ANSBow::ANSBow()
 {
@@ -9,22 +13,65 @@ ANSBow::ANSBow()
 	WeaponMesh->SetupAttachment(GetRootComponent());
 }
 
+void ANSBow::BeginPlay()
+{
+	Super::BeginPlay();
+	SpawnArrow();
+}
+
+void ANSBow::MakeHit(FHitResult& HitResult, const FVector& TraceEnd)
+{
+	UE_LOG(LogTemp, Error, TEXT("7"));
+	if (!CurrentArrow || !GetOwner() || !GetWorld()) return;
+
+	const auto Character = Cast<ANSBaseCharacter>(GetOwner());
+	if (!Character) return;
+	const FVector EndPoint = GetOwner()->GetActorForwardVector() * TraceMaxDistance;
+	const FVector Direction = (Character->GetMouseLocationByCharacter() - CurrentArrow->GetActorLocation()).GetSafeNormal();
+
+	//DrawDebugLine(GetWorld(), CurrentArrow->GetActorLocation(), Direction * TraceMaxDistance, FColor::Red, false, 1.0f);
+
+	CurrentArrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	CurrentArrow->ThrowArrow(Direction);
+	CurrentArrow = nullptr;
+
+}
+
+void ANSBow::Tick(float DeltaTime)
+{
+
+}
+
 bool ANSBow::StartAim()
 {
-	CanShot = true;
+
+	bAim = true;
 	return true;
 }
 
 bool ANSBow::StopAim()
 {
-	CanShot = false;
+
+	bAim = false;
 	return true;
+}
+
+void ANSBow::SpawnArrow()
+{
+	if (!GetWorld() || !GetOwner() || CurrentArrow) return;
+	
+	ACharacter* CurrentCharacter = Cast<ANSBaseCharacter>(GetOwner());
+	if (!CurrentCharacter) return;
+
+	CurrentArrow = GetWorld()->SpawnActorDeferred<ANSArrow>(ArrowClass, FTransform(), GetOwner());
+
+	CurrentArrow->FinishSpawning(FTransform());
+	NSUtils::AttachToSocket(CurrentArrow, CurrentCharacter->GetMesh(), ArrowSocketName);
 }
 
 void ANSBow::Shot()
 {
-	UE_LOG(LogTemp, Error, TEXT("bow start shot"));
-	if (!CanShot) return;
-	UE_LOG(LogTemp, Error, TEXT("bow shot"));
+	if (!bAim || !CurrentArrow) return;
 	Super::Shot();
 }
+

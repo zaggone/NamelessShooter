@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "NSArrow.generated.h"
 
+class USphereComponent;
+class UProjectileMovementComponent;
+
 UCLASS()
 class NAMELESSSHOOTER_API ANSArrow : public AActor
 {
@@ -20,10 +23,25 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 	USceneComponent* SceneRootComponent;
 
+	void ThrowArrow(const FVector& ShotDirection);
+
 protected:
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	USphereComponent* CollisionComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon")
+	UProjectileMovementComponent* MovementComponent;
+
 	virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
 
+private:
+	UFUNCTION()
+	void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
+	UFUNCTION()
+	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+public:
+	AController* GetController() const;
 };
