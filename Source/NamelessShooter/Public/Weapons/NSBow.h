@@ -37,6 +37,8 @@ protected:
 
 	virtual void Shot() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
 
 	ANSArrow* CurrentArrow = nullptr;

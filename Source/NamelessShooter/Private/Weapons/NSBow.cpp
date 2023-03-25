@@ -75,3 +75,12 @@ void ANSBow::Shot()
 	Super::Shot();
 }
 
+void ANSBow::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (CurrentArrow)
+	{
+		CurrentArrow->Destroy();
+		CurrentArrow = nullptr;
+	}
+	Super::EndPlay(EndPlayReason);
+}

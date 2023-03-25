@@ -37,7 +37,7 @@ void UNSWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 void UNSWeaponComponent::SpawnWeapons()
 {
 	if (!bArmed) return;
-	ACharacter* CurrentCharacter = Cast<ACharacter>(GetOwner());
+	const auto CurrentCharacter = Cast<ACharacter>(GetOwner());
 	if (!CurrentCharacter || !GetWorld()) return;
 
 	for (auto WeaponData : WeaponsData)
@@ -115,3 +115,11 @@ FWeaponData* UNSWeaponComponent::GetCurrentWeaponData()
 	return WeaponsData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); });
 }
 
+void UNSWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	CurrentWeapon->Destroy();
+	CurrentWeapon = nullptr;
+
+	Super::EndPlay(EndPlayReason);
+}

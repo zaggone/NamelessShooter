@@ -98,7 +98,6 @@ void ANSBaseCharacter::OnDeath()
 	SetLifeSpan(5.0f);
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetSimulatePhysics(true);
@@ -174,7 +173,7 @@ void ANSBaseCharacter::LookAlong(float Amount)
 	if (!bWantsLookAround || Amount == 0) return;
 
 	// если больше заданной дистанции то игнорим
-	if (FMath::Abs(SpringArmComponent->SocketOffset.Y + CameraLookoutVelocity * Amount) > MaxCameraLookoutDistance)
+	if (FMath::Abs(SpringArmComponent->SocketOffset.Y + CameraLookoutVelocity * Amount) >= MaxCameraLookoutDistance)
 	{
 		return;
 	}
@@ -187,7 +186,7 @@ void ANSBaseCharacter::LookAcross(float Amount)
 	if (!bWantsLookAround || Amount == 0) return;
 
 	// если больше заданной дистанции то игнорим
-	if (FMath::Abs(SpringArmComponent->SocketOffset.X + CameraLookoutVelocity * Amount) > MaxCameraLookoutDistance)
+	if (FMath::Abs(SpringArmComponent->SocketOffset.X + CameraLookoutVelocity * Amount) >= MaxCameraLookoutDistance)
 	{
 		return;
 	}

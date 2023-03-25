@@ -80,9 +80,12 @@ public:
 
 	ANSBaseWeapon* GetCurrentWeapon() const { return bArmed ? CurrentWeapon : nullptr; }
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:
 
 	FWeaponData* GetCurrentWeaponData();
+
 
 	ANSBaseWeapon* CurrentWeapon;
 
