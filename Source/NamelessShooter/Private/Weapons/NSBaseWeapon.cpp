@@ -5,6 +5,8 @@
 #include "DrawDebugHelpers.h"
 #include "Player/NSBaseCharacter.h"
 #include "Engine/World.h"
+#include "Weapons/Components/NSWeaponFXComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ANSBaseWeapon::ANSBaseWeapon()
 {
@@ -12,11 +14,13 @@ ANSBaseWeapon::ANSBaseWeapon()
 
 	SceneRootComponent = CreateDefaultSubobject<USceneComponent>("SceneRootComponent");
 	SetRootComponent(SceneRootComponent);
+
+	WeaponFXComponent = CreateDefaultSubobject<UNSWeaponFXComponent>("WeaponFXComponent");
 }
 
 void ANSBaseWeapon::BeginPlay()
 {
-	UE_LOG(LogTemp, Error, TEXT("9"));
+
 	Super::BeginPlay();
 	CurrentBulletsNum = BulletsNum;
 	Reload();
@@ -30,7 +34,7 @@ void ANSBaseWeapon::Tick(float DeltaTime)
 // вызывается когда выстреливаем
 void ANSBaseWeapon::Shot()
 {
-	if (!GetOwner() || !GetWorld()) return;
+	if (!GetOwner() || !GetWorld() || CurrentBulletInClipNum == 0) return;
 	FHitResult HitResult;
 	FVector TraceStart;
 	FVector TraceEnd;
@@ -38,15 +42,17 @@ void ANSBaseWeapon::Shot()
 	GetTraceData(TraceStart, TraceEnd);
 
 	GetHitResult(HitResult, TraceStart, TraceEnd);
+	
+	MakeHit(HitResult, TraceStart, TraceEnd);
 
-	MakeHit(HitResult, TraceEnd);
-
-	CurrentBulletInClipNum--;
-	if (CurrentBulletInClipNum == 0 && MayReload())
+	if (WeaponFXComponent) 
 	{
-		auto Character = Cast<ANSBaseCharacter>(GetOwner());
-		Character->WeaponReload();
+		if (WeaponFXComponent->bPlayImpactFX || WeaponFXComponent->bSpawnDecal) WeaponFXComponent->PlayImpactFX(HitResult);
+		if (WeaponFXComponent->bPlayMuzzleFX) WeaponFXComponent->PlayMuzzleFX(GetMesh(), MuzzleSocketName);
+		if (WeaponFXComponent->bPlayTraceFX) WeaponFXComponent->PlayTraceFX(TraceStart, HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd);
 	}
+
+	DecreaseAmmo();
 }
 
 // геттер player controller
@@ -66,12 +72,20 @@ FVector ANSBaseWeapon::GetMuzzleWorldLocation() const
 	return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
+void ANSBaseWeapon::DecreaseAmmo()
+{
+	CurrentBulletInClipNum--;
+	if (CurrentBulletInClipNum == 0 && MayReload())
+	{
+		auto Character = Cast<ANSBaseCharacter>(GetOwner());
+		Character->WeaponReload();
+	}
+}
+
 // метод получения инфы для трейса (начало / конец)
 void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 {	
 	if (!GetOwner() || !GetWorld()) return;
-	FVector ViewLocation;
-	FRotator ViewRotation;
 
 	TraceStart = GetMuzzleWorldLocation();
 	const FVector ShootDirection = GetOwner()->GetActorForwardVector();
@@ -81,7 +95,7 @@ void ANSBaseWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 // делаем line trace и получаем инфу о попадании, в зависимости от того куда попали наносим урон.
 void ANSBaseWeapon::GetHitResult(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
-	if (!GetOwner() || !GetWorld() || CurrentBulletInClipNum == 0) return;
+	if (!GetOwner() || !GetWorld()) return;
 
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(GetOwner());
@@ -91,7 +105,7 @@ void ANSBaseWeapon::GetHitResult(FHitResult& HitResult, const FVector& TraceStar
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
 }
 
-void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceEnd)
+void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
 	if (!GetOwner() || !GetWorld()) return;
 	if (HitResult.bBlockingHit)
@@ -99,7 +113,10 @@ void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceEnd)
 		if (HitResult.GetActor()->IsA<ANSBaseCharacter>())
 		{
 			auto Character = Cast<ANSBaseCharacter>(HitResult.GetActor());
-			Character->TakeDamage(DamageGiven, FDamageEvent(), GetPlayerController(), GetOwner());
+
+			Character->TakeDamage(DamageGiven, FPointDamageEvent(), GetPlayerController(), GetOwner());
+			if(Character->IsDead()) Character->GetMesh()->AddImpulse((TraceEnd - TraceStart).GetSafeNormal() * 5000, "Pelvis", true);
+			else Character->GetCharacterMovement()->AddImpulse((TraceEnd - TraceStart).GetSafeNormal() * 1000, true);
 		}
 	}
 }
@@ -123,5 +140,6 @@ void ANSBaseWeapon::Reload()
 
 bool ANSBaseWeapon::MayReload()
 {
-	return !(!GetWorld() || !GetOwner() || CurrentBulletsNum <= 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);
+	return !(!GetWorld() || !GetOwner() || CurrentBulletsNum == 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);
 }
+

@@ -6,20 +6,13 @@
 #include "Weapons/NSBaseWeapon.h"
 #include "NSRevolver.generated.h"
 
+class UNSWeaponFXComponent;
 UCLASS()
 class NAMELESSSHOOTER_API ANSRevolver : public ANSBaseWeapon
 {
 	GENERATED_BODY()
+
 public:
 
 	ANSRevolver();
-
-protected:
-	/*
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	UStaticMeshComponent* WeaponMesh;
-	*/
-public:
-
-	//virtual USceneComponent* GetWeaponSceneComponent() const override { return WeaponMesh; }
 };

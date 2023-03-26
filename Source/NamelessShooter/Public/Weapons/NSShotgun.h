@@ -6,21 +6,22 @@
 #include "Weapons/NSBaseWeapon.h"
 #include "NSShotgun.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class NAMELESSSHOOTER_API ANSShotgun : public ANSBaseWeapon
 {
 	GENERATED_BODY()
 public:
 	ANSShotgun();
-
 protected:
-	/*
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	UStaticMeshComponent* WeaponMesh;
-	*/
+	virtual void Shot() override;
+
+	virtual void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	int32 ShotsNum = 4;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	float BulletSpreadDegrees = 3.0f;
 public:
-	//virtual USceneComponent* GetWeaponSceneComponent() const override { return WeaponMesh; }
+
 };

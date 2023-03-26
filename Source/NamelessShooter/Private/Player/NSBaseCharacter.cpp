@@ -94,7 +94,7 @@ float ANSBaseCharacter::GetMovementDirection()
 // колл бек функция на смерть персонажа (когда погиб)
 void ANSBaseCharacter::OnDeath()
 {
-	GetCharacterMovement()->DisableMovement();
+	//GetCharacterMovement()->DisableMovement();
 	SetLifeSpan(5.0f);
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -102,6 +102,8 @@ void ANSBaseCharacter::OnDeath()
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetSimulatePhysics(true);
+
+	WeaponComponent->OnOwnerDeath();
 }
 
 // колл бек функция на изменение здоровья персонажа
@@ -119,7 +121,7 @@ void ANSBaseCharacter::SetPawnRotationToMouse()
 	const auto ActorXYVec = FVector(GetActorLocation().X, GetActorLocation().Y, 0.0f);
 	const auto MouseXYVec = FVector(MouseLocationByCharacter.X, MouseLocationByCharacter.Y, 0.0f);
 	//(если мышка ближе 120 см к персу то игнорируем)
-	if ((MouseXYVec - ActorXYVec).Size() > 120.0f)
+	if ((MouseXYVec - ActorXYVec).Size() > 70.0f)
 	{
 		NeedToRotating = UKismetMathLibrary::FindLookAtRotation(ActorXYVec, MouseXYVec);
 	}
@@ -191,7 +193,6 @@ void ANSBaseCharacter::LookAcross(float Amount)
 	{
 		return;
 	}
-
 	SpringArmComponent->SocketOffset.X += CameraLookoutVelocity * Amount;
 }
 // на выстрел
@@ -200,13 +201,18 @@ void ANSBaseCharacter::Shot()
 	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Shot();
 }
+
 // перезарядка
 void ANSBaseCharacter::WeaponReload()
 {
 	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Reload();
 }
-
+bool ANSBaseCharacter::IsDead()
+{
+	return HealthComponent->IsDead();
+}
+// геттер оружия
 ANSBaseWeapon* ANSBaseCharacter::GetCurrentWeapon() const
 {
 	return WeaponComponent->GetCurrentWeapon(); 

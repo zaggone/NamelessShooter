@@ -7,6 +7,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
+#include "Weapons/Components/NSWeaponFXComponent.h"
+#include "Player/NSBaseCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ANSArrow::ANSArrow()
 {
@@ -31,51 +34,56 @@ ANSArrow::ANSArrow()
 	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
 	ArrowMesh->SetupAttachment(GetRootComponent());
 
+	WeaponFXComponent = CreateDefaultSubobject<UNSWeaponFXComponent>("WeaponFXComponent");
+	WeaponFXComponent->bSpawnDecal = false;
+	WeaponFXComponent->bPlayMuzzleFX = false;
+	WeaponFXComponent->bPlayTraceFX = false;
 }
 
+void ANSArrow::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+// когда выстреливаем из лука
 void ANSArrow::ThrowArrow(const FVector& ShotDirection)
 {	
 	check(MovementComponent);
 	check(CollisionComponent);
+	CurrentShotDirection = ShotDirection;
 	MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
 	MovementComponent->Activate();
 
 	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + MovementComponent->Velocity , FColor::Red, false, 1.0f);
 
 	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ANSArrow::OnComponentBeginOverlap);
+	SetLifeSpan(20.0f);
 }
 
-void ANSArrow::BeginPlay()
-{
-	Super::BeginPlay();
-	
-
-}
-
-void ANSArrow::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (!GetWorld()) return;
-	MovementComponent->StopMovementImmediately();
-	if (OtherActor->IsA<ACharacter>()) 
-	{
-		OtherActor->TakeDamage(100.0f, FDamageEvent(), GetController(), GetOwner());
-		Destroy();
-	}
-}
-
+// колл бек на overlap
 void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!GetWorld()) return;
 	MovementComponent->StopMovementImmediately();
 
-	if (OtherActor->IsA<ACharacter>())
+	if (OtherActor->IsA<ANSBaseCharacter>())
 	{
-		OtherActor->TakeDamage(100.0f, FDamageEvent(), GetController(), GetOwner());
+		auto Character = Cast<ANSBaseCharacter>(OtherActor);
+
+		Character->TakeDamage(DamageGiven, FDamageEvent(), GetController(), GetOwner());
+		WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->CharacterImpactFX);
+		
+		if (Character->IsDead()) Character->GetMesh()->AddImpulse(CurrentShotDirection * 5000, "Pelvis", true);
+		else Character->GetCharacterMovement()->AddImpulse(CurrentShotDirection * 1000, true);
 		Destroy();
+		return;
 	}
 
+	WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->DefaultImpactFX);
+	SetOwner(nullptr);
+	//SetLifeSpan(20.0f);
 }
-
+// геттер контроллера
 AController* ANSArrow::GetController() const
 {
 	const auto Pawn = Cast<APawn>(GetOwner());

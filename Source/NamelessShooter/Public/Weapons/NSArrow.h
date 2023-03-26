@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
+class UNSWeaponFXComponent;
 
 UCLASS()
 class NAMELESSSHOOTER_API ANSArrow : public AActor
@@ -25,6 +26,11 @@ public:
 
 	void ThrowArrow(const FVector& ShotDirection);
 
+	void SetDamageGiven(float Damage) { DamageGiven = Damage; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX", meta = (EditCondition = "bHasFXComponent"))
+	UNSWeaponFXComponent* WeaponFXComponent;
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
@@ -35,13 +41,14 @@ protected:
 
 	virtual void BeginPlay() override;
 
-
 private:
-	UFUNCTION()
-	void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	float DamageGiven;
 	
 	UFUNCTION()
 	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	FVector CurrentShotDirection;
 public:
 	AController* GetController() const;
 };

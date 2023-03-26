@@ -14,18 +14,16 @@ class NAMELESSSHOOTER_API ANSBow : public ANSBaseWeapon
 
 public:
 	ANSBow();
-	
-	virtual void Tick(float DeltaTime) override;
 
 protected:
 	
-
 	virtual bool StartAim() override;
+
 	virtual bool StopAim() override;
 
 	virtual void BeginPlay() override;
 
-	virtual void MakeHit(FHitResult& HitResult, const FVector& TraceEnd) override;
+	virtual void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ANSArrow> ArrowClass;
@@ -38,6 +36,10 @@ protected:
 	virtual void Shot() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
+
+	virtual void OnOwnerDeath() override;
 
 private:
 

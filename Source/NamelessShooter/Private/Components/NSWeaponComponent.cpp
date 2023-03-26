@@ -33,10 +33,10 @@ void UNSWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 }
-
+// спавн оружия 
 void UNSWeaponComponent::SpawnWeapons()
 {
-	if (!bArmed) return;
+	if (!bArmed || CurrentWeapon) return;
 	const auto CurrentCharacter = Cast<ACharacter>(GetOwner());
 	if (!CurrentCharacter || !GetWorld()) return;
 
@@ -72,7 +72,7 @@ void UNSWeaponComponent::Reload()
 	CurrentWeapon->Reload();
 	StopAim();
 }
-
+// геттер анимационного блюпринта для конкретного оружия
 TSubclassOf<UAnimInstance> UNSWeaponComponent::GetCurrentAnimInstanceClass()
 {
 	if (!bArmed || !CurrentWeapon) checkNoEntry(); // какого хера функция тогда вообще была вызвана а?
@@ -102,6 +102,7 @@ void UNSWeaponComponent::StopAim()
 	if(CurrentWeapon->StopAim()) 
 	{
 		const auto Character = Cast<ACharacter>(GetOwner());
+		if (!Character) return;
 		const auto CurrentWeaponData = GetCurrentWeaponData();
 		if (!CurrentWeaponData->bNeedAimAnimMontage || !CurrentWeaponData->AimAnimMontage) checkNoEntry(); // скорее всего не установлен AimAnimMontage
 		Character->StopAnimMontage(CurrentWeaponData->AimAnimMontage);
@@ -114,12 +115,19 @@ FWeaponData* UNSWeaponComponent::GetCurrentWeaponData()
 	if (!CurrentWeapon || WeaponsData.Num() == 0) checkNoEntry(); // чета с оружием или WeaponData-ой :-|
 	return WeaponsData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); });
 }
-
+// чистка указателя на оружия;
 void UNSWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	CurrentWeapon->Destroy();
-	CurrentWeapon = nullptr;
-
+	if (CurrentWeapon) 
+	{
+		CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		CurrentWeapon->Destroy();
+		CurrentWeapon = nullptr;
+	}
 	Super::EndPlay(EndPlayReason);
+}
+
+void UNSWeaponComponent::OnOwnerDeath()
+{
+	CurrentWeapon->OnOwnerDeath();
 }

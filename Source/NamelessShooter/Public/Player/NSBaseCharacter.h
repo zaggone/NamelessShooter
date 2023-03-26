@@ -70,13 +70,15 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool bReloadAnimMontageInProgress = false;
 
-	void WeaponReload();
-
 	UFUNCTION(BlueprintCallable)
 	bool WantsLookAround() { return bWantsLookAround; }
 
 	UFUNCTION(BlueprintCallable)
 	ANSBaseWeapon* GetCurrentWeapon() const;
+	
+	void WeaponReload();
+
+	bool IsDead();
 
 private:
 

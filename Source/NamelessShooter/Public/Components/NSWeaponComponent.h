@@ -38,6 +38,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bNeedAimAnimMontage"))
 	UAnimMontage* AimAnimMontage;
 
+
+
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -69,6 +71,8 @@ public:
 	void Shot();
 	
 	void Reload();
+
+	void OnOwnerDeath();
 
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<UAnimInstance> GetCurrentAnimInstanceClass();
