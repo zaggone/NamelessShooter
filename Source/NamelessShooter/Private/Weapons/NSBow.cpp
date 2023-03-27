@@ -99,6 +99,7 @@ void ANSBow::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 
 void ANSBow::OnOwnerDeath()
 {
+	if (!CurrentArrow) return;
 	CurrentArrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentArrow->Destroy();
 }
