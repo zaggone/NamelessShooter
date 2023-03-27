@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
-#include "NS_PlayerController.generated.h"
+#include "Player/NSBaseCharacter.h"
+#include "NSPlayerCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class NAMELESSSHOOTER_API ANS_PlayerController : public APlayerController
+class NAMELESSSHOOTER_API ANSPlayerCharacter : public ANSBaseCharacter
 {
 	GENERATED_BODY()
 	
