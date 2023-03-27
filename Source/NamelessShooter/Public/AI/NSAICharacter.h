@@ -6,12 +6,17 @@
 #include "Player/NSBaseCharacter.h"
 #include "NSAICharacter.generated.h"
 
-/**
- * 
- */
+class UBehaviorTree;
+
 UCLASS()
 class NAMELESSSHOOTER_API ANSAICharacter : public ANSBaseCharacter
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	ANSAICharacter();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
+	UBehaviorTree* BehaviorTreeAsset;
 };

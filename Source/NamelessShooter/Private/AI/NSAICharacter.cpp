@@ -3,3 +3,6 @@
 
 #include "AI/NSAICharacter.h"
 
+ANSAICharacter::ANSAICharacter()
+{
+}

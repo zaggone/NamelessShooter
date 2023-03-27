@@ -6,12 +6,12 @@
 #include "AIController.h"
 #include "NSAIController.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class NAMELESSSHOOTER_API ANSAIController : public AAIController
 {
 	GENERATED_BODY()
-	
+protected:
+
+	virtual void OnPossess(APawn* InPawn) override;
 };
