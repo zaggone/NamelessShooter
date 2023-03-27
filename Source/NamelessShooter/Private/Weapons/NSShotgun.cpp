@@ -10,6 +10,8 @@ ANSShotgun::ANSShotgun()
 	WeaponMesh->SetupAttachment(GetRootComponent());
 
 	MaxBulletsInClipNum = 8;
+	RagdollImpulse = 3000.0f;
+	DamageGiven = 30.0f;
 }
 
 void ANSShotgun::Shot()

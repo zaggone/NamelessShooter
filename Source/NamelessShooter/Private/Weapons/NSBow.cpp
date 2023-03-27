@@ -80,7 +80,9 @@ void ANSBow::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		CurrentArrow->Destroy();
 		CurrentArrow = nullptr;
-	}
+	} 
+	else CurrentArrow = nullptr;
+	
 	Super::EndPlay(EndPlayReason);
 }
 

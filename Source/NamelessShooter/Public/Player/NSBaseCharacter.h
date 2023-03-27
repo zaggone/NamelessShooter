@@ -80,6 +80,12 @@ public:
 
 	bool IsDead();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnCharacterDeath();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTakeDamage();
+
 private:
 
 	bool bWantsLookAround = false;

@@ -6,7 +6,6 @@
 #include "Weapons/NSBaseWeapon.h"
 #include "NSRevolver.generated.h"
 
-class UNSWeaponFXComponent;
 UCLASS()
 class NAMELESSSHOOTER_API ANSRevolver : public ANSBaseWeapon
 {

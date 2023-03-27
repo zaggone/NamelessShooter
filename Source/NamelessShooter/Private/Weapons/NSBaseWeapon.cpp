@@ -20,7 +20,6 @@ ANSBaseWeapon::ANSBaseWeapon()
 
 void ANSBaseWeapon::BeginPlay()
 {
-
 	Super::BeginPlay();
 	CurrentBulletsNum = BulletsNum;
 	Reload();
@@ -52,6 +51,8 @@ void ANSBaseWeapon::Shot()
 		if (WeaponFXComponent->bPlayTraceFX) WeaponFXComponent->PlayTraceFX(TraceStart, HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd);
 	}
 
+	OnShot();
+
 	DecreaseAmmo();
 }
 
@@ -72,6 +73,7 @@ FVector ANSBaseWeapon::GetMuzzleWorldLocation() const
 	return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 }
 
+// убирает патрон при выстреле
 void ANSBaseWeapon::DecreaseAmmo()
 {
 	CurrentBulletInClipNum--;
@@ -104,7 +106,7 @@ void ANSBaseWeapon::GetHitResult(FHitResult& HitResult, const FVector& TraceStar
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionQueryParams);
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
 }
-
+// собственно нанесение урона и т д.
 void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd)
 {
 	if (!GetOwner() || !GetWorld()) return;
@@ -115,7 +117,7 @@ void ANSBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, co
 			auto Character = Cast<ANSBaseCharacter>(HitResult.GetActor());
 
 			Character->TakeDamage(DamageGiven, FPointDamageEvent(), GetPlayerController(), GetOwner());
-			if(Character->IsDead()) Character->GetMesh()->AddImpulse((TraceEnd - TraceStart).GetSafeNormal() * 5000, "Pelvis", true);
+			if(Character->IsDead()) Character->GetMesh()->AddImpulse((TraceEnd - TraceStart).GetSafeNormal() * RagdollImpulse, "Pelvis", true);
 			else Character->GetCharacterMovement()->AddImpulse((TraceEnd - TraceStart).GetSafeNormal() * 1000, true);
 		}
 	}
@@ -136,8 +138,10 @@ void ANSBaseWeapon::Reload()
 		CurrentBulletInClipNum = CurrentBulletsNum;
 		CurrentBulletsNum = 0;
 	}
-}
 
+	OnReload();
+}
+// возвращщает true если оружие можно перезарялить
 bool ANSBaseWeapon::MayReload()
 {
 	return !(!GetWorld() || !GetOwner() || CurrentBulletsNum == 0 || CurrentBulletInClipNum == MaxBulletsInClipNum);

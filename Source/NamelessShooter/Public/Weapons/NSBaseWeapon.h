@@ -34,11 +34,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "20", ClampMax = "200"))
 	float DamageGiven = 80.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "2000", ClampMax = "7000"))
+	float RagdollImpulse = 5000.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1", ClampMax = "200"))
 	int32 MaxBulletsInClipNum = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "1", ClampMax = "10000"))
-	int32 BulletsNum = 50.0f;
+	int32 BulletsNum = 50;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX", meta = (EditCondition = "bHasFXComponent"))
 	UNSWeaponFXComponent* WeaponFXComponent;
@@ -64,6 +67,12 @@ public:
 
 	virtual void OnOwnerDeath() { return; }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnShot();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnReload();
+
 protected:
 	
 	virtual void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
@@ -75,10 +84,10 @@ protected:
 	APlayerController* GetPlayerController() const;
 
 	FVector GetMuzzleWorldLocation() const;
-
-	void DecreaseAmmo();
 	
 	int32 CurrentBulletInClipNum;
 	int32 CurrentBulletsNum;
-	
+
+private:
+	void DecreaseAmmo();
 };

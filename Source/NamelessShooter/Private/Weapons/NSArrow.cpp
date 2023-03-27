@@ -75,13 +75,16 @@ void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		
 		if (Character->IsDead()) Character->GetMesh()->AddImpulse(CurrentShotDirection * 5000, "Pelvis", true);
 		else Character->GetCharacterMovement()->AddImpulse(CurrentShotDirection * 1000, true);
+		OnHitAtCharacter();
+		SetOwner(nullptr);
 		Destroy();
 		return;
 	}
 
 	WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->DefaultImpactFX);
 	SetOwner(nullptr);
-	//SetLifeSpan(20.0f);
+	OnHitDefault();
+
 }
 // геттер контроллера
 AController* ANSArrow::GetController() const

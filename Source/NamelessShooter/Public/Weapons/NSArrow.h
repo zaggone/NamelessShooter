@@ -31,6 +31,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VFX", meta = (EditCondition = "bHasFXComponent"))
 	UNSWeaponFXComponent* WeaponFXComponent;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHitAtCharacter();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHitDefault();
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")

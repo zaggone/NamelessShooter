@@ -94,7 +94,7 @@ float ANSBaseCharacter::GetMovementDirection()
 // колл бек функция на смерть персонажа (когда погиб)
 void ANSBaseCharacter::OnDeath()
 {
-	//GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->DisableMovement();
 	SetLifeSpan(5.0f);
 
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -104,13 +104,14 @@ void ANSBaseCharacter::OnDeath()
 	GetMesh()->SetSimulatePhysics(true);
 
 	WeaponComponent->OnOwnerDeath();
+
+	OnCharacterDeath();
 }
 
 // колл бек функция на изменение здоровья персонажа
 void ANSBaseCharacter::OnHealthChanged(float Health, float DeltaHealth)
 {
-	
-
+	if (DeltaHealth < 0) OnTakeDamage();
 }
 // вращаем перса к мышке 
 void ANSBaseCharacter::SetPawnRotationToMouse()
