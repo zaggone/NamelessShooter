@@ -17,6 +17,8 @@ public:
 
 	ANSAICharacter();
 
+	virtual void OnDeath() override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
 	UBehaviorTree* BehaviorTreeAsset;
 };

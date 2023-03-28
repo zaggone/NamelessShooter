@@ -29,7 +29,7 @@ protected:
 
 	virtual void BeginPlay() override;	
 
-	void OnDeath();
+	virtual void OnDeath();
 
 	void OnHealthChanged(float Health, float DeltaHealth);
 
