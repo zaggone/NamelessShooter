@@ -7,6 +7,7 @@
 #include "Player/NSBaseCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "Weapons/Components/NSWeaponFXComponent.h"
+#include "Player/NSPlayerCharacter.h"
 
 ANSBow::ANSBow()
 {
@@ -93,12 +94,23 @@ void ANSBow::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 	const auto Character = Cast<ANSBaseCharacter>(GetOwner());
 	if (!Character) return;
 
+	const auto PlayerCharacter = Cast<ANSPlayerCharacter>(Character);
+	if (PlayerCharacter)
+	{
+		TraceEnd = PlayerCharacter->GetMouseLocationByCharacter();
+	}
+	else 
+	{
+		TraceEnd = Character->GetActorForwardVector() * TraceMaxDistance;
+	}
+
 	TraceStart = CurrentArrow->GetActorLocation();
-	TraceEnd = Character->GetMouseLocationByCharacter();
 }
 
 void ANSBow::OnOwnerDeath()
 {
+	if (!CurrentArrow) return;
 	CurrentArrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	CurrentArrow->Destroy();
+	CurrentArrow->OnOwnerDeath();
+	CurrentArrow = nullptr;
 }

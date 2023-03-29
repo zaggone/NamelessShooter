@@ -3,13 +3,12 @@
 #include "Weapons/NSArrow.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
-#include "DrawDebugHelpers.h"
 #include "Weapons/Components/NSWeaponFXComponent.h"
 #include "Player/NSBaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Delegates/DelegateBase.h"
 
 ANSArrow::ANSArrow()
 {
@@ -63,12 +62,18 @@ void ANSArrow::ThrowArrow(const FVector& ShotDirection)
 // колл бек на overlap
 void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!GetWorld()) return;
-	MovementComponent->StopMovementImmediately();
+	if (!GetWorld() || !GetOwner()) return;
 
+	auto Character = Cast<ANSBaseCharacter>(OtherActor);
+
+	if (Character == Cast<ANSBaseCharacter>(GetOwner())) return;
+
+	MovementComponent->StopMovementImmediately();
 	if (OtherActor->IsA<ANSBaseCharacter>())
 	{
-		auto Character = Cast<ANSBaseCharacter>(OtherActor);
+		
+
+		if (Cast<ANSBaseCharacter>(GetOwner()) == Character) return;
 
 		Character->TakeDamage(DamageGiven, FDamageEvent(), GetController(), GetOwner());
 		WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->CharacterImpactFX);
@@ -85,12 +90,27 @@ void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	SetOwner(nullptr);
 	OnHitDefault();
 
+	FTimerHandle ArrowTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(ArrowTimerHandle, this, &ANSArrow::ClearCollision, 2.0f, false);
+	//CollisionComponent->OnComponentBeginOverlap.Clear();
 }
 // геттер контроллера
 AController* ANSArrow::GetController() const
 {
 	const auto Pawn = Cast<APawn>(GetOwner());
 	return Pawn ? Pawn->GetController() : nullptr;
+}
+
+void ANSArrow::OnOwnerDeath()
+{
+	CollisionComponent->OnComponentBeginOverlap.Clear();
+	SetOwner(nullptr);
+	Destroy();
+}
+
+void ANSArrow::ClearCollision()
+{
+	CollisionComponent->OnComponentBeginOverlap.Clear();
 }
 
 

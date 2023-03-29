@@ -129,5 +129,6 @@ void UNSWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNSWeaponComponent::OnOwnerDeath()
 {
+	if (!CurrentWeapon) return;
 	CurrentWeapon->OnOwnerDeath();
 }

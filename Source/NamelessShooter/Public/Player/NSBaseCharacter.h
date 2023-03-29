@@ -6,8 +6,6 @@
 #include "GameFramework/Character.h"
 #include "NSBaseCharacter.generated.h"
 
-class UCameraComponent;
-class USpringArmComponent;
 class UNSHealthComponent;
 class UNSWeaponComponent;
 class ANSBaseWeapon;
@@ -22,50 +20,34 @@ public:
 	ANSBaseCharacter();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	USpringArmComponent* SpringArmComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UCameraComponent* CameraComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UNSHealthComponent* HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UNSWeaponComponent* WeaponComponent;
-	
 
 protected:
 
 	virtual void BeginPlay() override;	
 
-	void OnDeath();
+	virtual void OnDeath();
 
 	void OnHealthChanged(float Health, float DeltaHealth);
-
-	void StartLookingAround();
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	int32 TeamID;
+	
 public:	
 
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable)
+	int32 GetTeamID() const { return TeamID; }
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
 
-	void StopLookingAround();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "5.0", ClampMax = "2000.0"))
-	float CameraLookoutVelocity = 20.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "1000.0", ClampMax = "10000.0"))
-	float MaxCameraLookoutDistance = 2000.0f;
-
-	void SetPawnRotationToMouse();
-
-	APlayerController* GetPlayerController();
-
-	FVector GetMouseLocationByCharacter();
+	UFUNCTION(BlueprintCallable)
+	bool IsArmed();
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bReloadAnimMontageInProgress = false;
@@ -85,18 +67,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTakeDamage();
-
-private:
-
-	bool bWantsLookAround = false;
 	
-	void MoveAlong(float Amount);
-	void MoveAcross(float Amount);
-
-	void LookAlong(float Amount);
-	void LookAcross(float Amount);
-
 	void Shot();
 
-	FRotator NeedToRotating;
+	bool bWantsLookAround = false;
+
 };

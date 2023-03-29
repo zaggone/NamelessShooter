@@ -57,4 +57,8 @@ private:
 	FVector CurrentShotDirection;
 public:
 	AController* GetController() const;
+
+	void OnOwnerDeath();
+
+	void ClearCollision();
 };
