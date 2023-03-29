@@ -39,6 +39,7 @@ protected:
 
 	virtual void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
 
+	UFUNCTION()
 	virtual void OnOwnerDeath() override;
 
 private:

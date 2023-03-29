@@ -17,6 +17,7 @@ ANSAICharacter::ANSAICharacter()
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator{ 0.0f, 200.0f, 0.0f };
 	}
+	//ToMovePoints.Add(GetActorLocation());
 }
 
 void ANSAICharacter::OnDeath()
@@ -30,3 +31,5 @@ void ANSAICharacter::OnDeath()
 	}
 
 }
+
+

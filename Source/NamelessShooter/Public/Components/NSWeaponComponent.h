@@ -38,8 +38,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "bNeedAimAnimMontage"))
 	UAnimMontage* AimAnimMontage;
 
-
-
+	
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -66,6 +65,9 @@ protected:
 
 public:	
 
+	UFUNCTION(BlueprintCallable)
+	bool IsArmed() { return bArmed; }
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	void Shot();
@@ -89,7 +91,6 @@ public:
 private:
 
 	FWeaponData* GetCurrentWeaponData();
-
 
 	ANSBaseWeapon* CurrentWeapon;
 

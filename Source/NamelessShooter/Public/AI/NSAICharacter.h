@@ -21,4 +21,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
 	UBehaviorTree* BehaviorTreeAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	TArray<FVector> ToMovePoints;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FVector>& GetToMovePoints() { return ToMovePoints; }
+protected:
+	//virtual void BeginPlay() override;
 };

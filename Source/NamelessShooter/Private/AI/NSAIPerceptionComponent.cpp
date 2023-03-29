@@ -4,6 +4,7 @@
 #include "AIController.h"
 #include "Components/NSHealthComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "Player/NSBaseCharacter.h"
 
 UNSAIPerceptionComponent::UNSAIPerceptionComponent()
 {
@@ -12,7 +13,6 @@ UNSAIPerceptionComponent::UNSAIPerceptionComponent()
 
 AActor* UNSAIPerceptionComponent::GetClosestEnemy() const
 {
-
 	TArray<AActor*> PercieveActors;
 	GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), PercieveActors);
 	if (PercieveActors.Num() == 0) return nullptr;
@@ -20,8 +20,8 @@ AActor* UNSAIPerceptionComponent::GetClosestEnemy() const
 	const auto Controller = Cast<AAIController>(GetOwner());
 	if (!Controller) return nullptr;
 
-	const auto Pawn = Controller->GetPawn();
-	if (!Pawn) return nullptr;
+	const auto Character = Cast<ANSBaseCharacter>(Controller->GetPawn());
+	if (!Character || !Character->IsArmed()) return nullptr;
 
 	float BestDistance = MAX_FLT;
 	AActor* BestPawn = nullptr;
@@ -30,13 +30,13 @@ AActor* UNSAIPerceptionComponent::GetClosestEnemy() const
 	{
 		const auto HealthComponent = PercieveActor->FindComponentByClass<UNSHealthComponent>();
 
-		const auto PercievePawn = Cast<APawn>(PercieveActor);
+		const auto PercieveCharacter = Cast<ANSBaseCharacter>(PercieveActor);
 
-		//const auto AreEnemies = PercievePawn && STUUtils::AreEnemies(Controller, PercievePawn->GetController());
+		const auto AreEnemies = PercieveCharacter && PercieveCharacter->GetTeamID() == Character->GetTeamID();
 
-		if (HealthComponent && !HealthComponent->IsDead())
+		if (HealthComponent && !HealthComponent->IsDead() && !AreEnemies)
 		{
-			const auto CurrentDistance = (PercieveActor->GetActorLocation() - Pawn->GetActorLocation()).Size();
+			const auto CurrentDistance = (PercieveActor->GetActorLocation() - Character->GetActorLocation()).Size();
 			if (CurrentDistance < BestDistance)
 			{
 				BestDistance = CurrentDistance;

@@ -44,6 +44,11 @@ float ANSBaseCharacter::GetMovementDirection()
 	return CrossProduct.IsZero() ? Degreese : Degreese * FMath::Sign(CrossProduct.Z);
 }
 
+bool ANSBaseCharacter::IsArmed()
+{
+	return WeaponComponent->IsArmed();
+}
+
 // колл бек функция на смерть персонажа (когда погиб)
 void ANSBaseCharacter::OnDeath()
 {

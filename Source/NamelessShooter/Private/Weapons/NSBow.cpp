@@ -111,5 +111,6 @@ void ANSBow::OnOwnerDeath()
 {
 	if (!CurrentArrow) return;
 	CurrentArrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	CurrentArrow->Destroy();
+	CurrentArrow->OnOwnerDeath();
+	CurrentArrow = nullptr;
 }

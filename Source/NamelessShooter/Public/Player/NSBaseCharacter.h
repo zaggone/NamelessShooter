@@ -32,13 +32,22 @@ protected:
 	virtual void OnDeath();
 
 	void OnHealthChanged(float Health, float DeltaHealth);
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	int32 TeamID;
+	
 public:	
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetTeamID() const { return TeamID; }
 
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
 	float GetMovementDirection();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsArmed();
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bReloadAnimMontageInProgress = false;

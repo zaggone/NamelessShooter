@@ -17,17 +17,18 @@ void UNSFireService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 	const auto Controller = OwnerComp.GetAIOwner();
 	const auto Blackboard = OwnerComp.GetBlackboardComponent();
 
-	const auto HasAim = Blackboard && Blackboard->GetValueAsObject(EnemyActorKey.SelectedKeyName);
+	const auto EnemyActor = Cast<AActor>(Blackboard->GetValueAsObject(EnemyActorKey.SelectedKeyName));
 
-	if (Controller)
+	if (Controller && EnemyActor)
 	{
 		const auto Character = Cast<ANSBaseCharacter>(Controller->GetPawn());
 		if (Character)
 		{
 			Character->Shot();
+			Blackboard->SetValueAsVector(EnemyLocationCacheKey.SelectedKeyName, EnemyActor->GetActorLocation());
+			Blackboard->SetValueAsBool(HasEnemyLocationCacheKey.SelectedKeyName, true);
 		}
 	}
 
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
 }
