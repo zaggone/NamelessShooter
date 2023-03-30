@@ -27,6 +27,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FVector>& GetToMovePoints() { return ToMovePoints; }
+
 protected:
 	//virtual void BeginPlay() override;
 };

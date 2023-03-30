@@ -2,12 +2,12 @@
 
 
 #include "Weapons/Components/NSWeaponFXComponent.h"
-#include "E:/Epic/Epic Games/DBD/UE_4.27/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h"
+#include "Niagara/Public/NiagaraFunctionLibrary.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/Character.h"
-#include "E:/Epic/Epic Games/DBD/UE_4.27/Engine/Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
+#include "Niagara/Public/NiagaraComponent.h"
 
 UNSWeaponFXComponent::UNSWeaponFXComponent()
 {

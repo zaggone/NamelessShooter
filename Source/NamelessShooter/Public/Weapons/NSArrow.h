@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "NSArrow.generated.h"
 
-class USphereComponent;
+class UCapsuleComponent;
 class UProjectileMovementComponent;
 class UNSWeaponFXComponent;
 
@@ -39,8 +39,8 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon")
-	USphereComponent* CollisionComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
+	UCapsuleComponent* CollisionComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	UProjectileMovementComponent* MovementComponent;
@@ -50,11 +50,12 @@ protected:
 private:
 
 	float DamageGiven;
-	
-	UFUNCTION()
-	void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	
 	FVector CurrentShotDirection;
+
 public:
 	AController* GetController() const;
 

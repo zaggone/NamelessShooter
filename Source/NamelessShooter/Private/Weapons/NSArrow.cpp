@@ -9,25 +9,21 @@
 #include "Player/NSBaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Delegates/DelegateBase.h"
+#include "Components/CapsuleComponent.h"
 
 ANSArrow::ANSArrow()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	SceneRootComponent = CreateDefaultSubobject<USceneComponent>("SceneRootComponent");
-	SetRootComponent(SceneRootComponent);
-
-	CollisionComponent = CreateDefaultSubobject<USphereComponent>("CollisionComponent");
-	CollisionComponent->InitSphereRadius(5.0f);
+	CollisionComponent = CreateDefaultSubobject<UCapsuleComponent>("CollisionComponent");
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
-	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	CollisionComponent->bReturnMaterialOnMove = true;
-	CollisionComponent->SetupAttachment(GetRootComponent());
+	SetRootComponent(CollisionComponent);
 
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
 	MovementComponent->bAutoActivate = false;
-	MovementComponent->InitialSpeed = 2000.0f;
+	MovementComponent->InitialSpeed = 3000.0f;
 	MovementComponent->ProjectileGravityScale = 0.0f;
 
 	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
@@ -42,6 +38,7 @@ ANSArrow::ANSArrow()
 void ANSArrow::BeginPlay()
 {
 	Super::BeginPlay();
+	CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
 }
 
 // когда выстреливаем из лука
@@ -53,31 +50,34 @@ void ANSArrow::ThrowArrow(const FVector& ShotDirection)
 	MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
 	MovementComponent->Activate();
 
-	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + MovementComponent->Velocity , FColor::Red, false, 1.0f);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ANSArrow::OnComponentBeginOverlap);
+	//CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ANSArrow::OnComponentBeginOverlap);
+
+	CollisionComponent->OnComponentHit.AddDynamic(this, &ANSArrow::OnComponentHit);
 	SetLifeSpan(20.0f);
 }
 
-// колл бек на overlap
-void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// колл бек на hit
+void ANSArrow::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	UE_LOG(LogTemp, Error, TEXT("!!!"));
+
 	if (!GetWorld() || !GetOwner()) return;
 
 	auto Character = Cast<ANSBaseCharacter>(OtherActor);
 
-	if (Character == Cast<ANSBaseCharacter>(GetOwner())) return;
-
-	MovementComponent->StopMovementImmediately();
-	if (OtherActor->IsA<ANSBaseCharacter>())
+	if (Character)
 	{
-		
+		if (Character == Cast<ANSBaseCharacter>(GetOwner())) return;
+
+		MovementComponent->StopMovementImmediately();
 
 		if (Cast<ANSBaseCharacter>(GetOwner()) == Character) return;
 
 		Character->TakeDamage(DamageGiven, FDamageEvent(), GetController(), GetOwner());
 		WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->CharacterImpactFX);
-		
+
 		if (Character->IsDead()) Character->GetMesh()->AddImpulse(CurrentShotDirection * 5000, "Pelvis", true);
 		else Character->GetCharacterMovement()->AddImpulse(CurrentShotDirection * 1000, true);
 		OnHitAtCharacter();
@@ -86,14 +86,17 @@ void ANSArrow::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		return;
 	}
 
+	MovementComponent->StopMovementImmediately();
+
 	WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->DefaultImpactFX);
 	SetOwner(nullptr);
 	OnHitDefault();
 
 	FTimerHandle ArrowTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(ArrowTimerHandle, this, &ANSArrow::ClearCollision, 2.0f, false);
-	//CollisionComponent->OnComponentBeginOverlap.Clear();
+	GetWorld()->GetTimerManager().SetTimer(ArrowTimerHandle, this, &ANSArrow::ClearCollision, 1.0f, false);
 }
+
+
 // геттер контроллера
 AController* ANSArrow::GetController() const
 {
@@ -103,14 +106,15 @@ AController* ANSArrow::GetController() const
 
 void ANSArrow::OnOwnerDeath()
 {
-	CollisionComponent->OnComponentBeginOverlap.Clear();
+	ClearCollision();
 	SetOwner(nullptr);
 	Destroy();
 }
 
 void ANSArrow::ClearCollision()
 {
-	CollisionComponent->OnComponentBeginOverlap.Clear();
+	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CollisionComponent->OnComponentHit.Clear();
 }
 
 
