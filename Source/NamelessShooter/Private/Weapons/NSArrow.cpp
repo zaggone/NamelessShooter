@@ -15,12 +15,6 @@ ANSArrow::ANSArrow()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	CollisionComponent = CreateDefaultSubobject<UCapsuleComponent>("CollisionComponent");
-	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	CollisionComponent->bReturnMaterialOnMove = true;
-	SetRootComponent(CollisionComponent);
-
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComponent");
 	MovementComponent->bAutoActivate = false;
 	MovementComponent->InitialSpeed = 3000.0f;
@@ -28,6 +22,10 @@ ANSArrow::ANSArrow()
 
 	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
 	ArrowMesh->SetupAttachment(GetRootComponent());
+	ArrowMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ArrowMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ArrowMesh->bReturnMaterialOnMove = true;
+	SetRootComponent(ArrowMesh);
 
 	WeaponFXComponent = CreateDefaultSubobject<UNSWeaponFXComponent>("WeaponFXComponent");
 	WeaponFXComponent->bSpawnDecal = false;
@@ -38,23 +36,23 @@ ANSArrow::ANSArrow()
 void ANSArrow::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
+	ArrowMesh->IgnoreActorWhenMoving(GetOwner(), true);
 }
 
 // когда выстреливаем из лука
 void ANSArrow::ThrowArrow(const FVector& ShotDirection)
 {	
 	check(MovementComponent);
-	check(CollisionComponent);
+	check(ArrowMesh);
 	CurrentShotDirection = ShotDirection;
 	MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
 	MovementComponent->Activate();
 
-	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	ArrowMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
 	//CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ANSArrow::OnComponentBeginOverlap);
 
-	CollisionComponent->OnComponentHit.AddDynamic(this, &ANSArrow::OnComponentHit);
+	ArrowMesh->OnComponentHit.AddDynamic(this, &ANSArrow::OnComponentHit);
 	SetLifeSpan(20.0f);
 }
 
@@ -76,7 +74,7 @@ void ANSArrow::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 		if (Cast<ANSBaseCharacter>(GetOwner()) == Character) return;
 
 		Character->TakeDamage(DamageGiven, FDamageEvent(), GetController(), GetOwner());
-		WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->CharacterImpactFX);
+		WeaponFXComponent->PlayFXAtLocation(Hit.ImpactPoint, -CurrentShotDirection, WeaponFXComponent->CharacterImpactFX);
 
 		if (Character->IsDead()) Character->GetMesh()->AddImpulse(CurrentShotDirection * 5000, "Pelvis", true);
 		else Character->GetCharacterMovement()->AddImpulse(CurrentShotDirection * 1000, true);
@@ -88,12 +86,13 @@ void ANSArrow::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherAc
 
 	MovementComponent->StopMovementImmediately();
 
-	WeaponFXComponent->PlayFXAtLocation(CollisionComponent->GetComponentLocation(), -CurrentShotDirection, WeaponFXComponent->DefaultImpactFX);
+	WeaponFXComponent->PlayFXAtLocation(Hit.ImpactPoint, -CurrentShotDirection, WeaponFXComponent->DefaultImpactFX);
 	SetOwner(nullptr);
 	OnHitDefault();
 
 	FTimerHandle ArrowTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(ArrowTimerHandle, this, &ANSArrow::ClearCollision, 1.0f, false);
+	ClearCollision();
+	//GetWorld()->GetTimerManager().SetTimer(ArrowTimerHandle, this, &ANSArrow::ClearCollision, 1.0f, false);
 }
 
 
@@ -113,8 +112,8 @@ void ANSArrow::OnOwnerDeath()
 
 void ANSArrow::ClearCollision()
 {
-	CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	CollisionComponent->OnComponentHit.Clear();
+	ArrowMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ArrowMesh->OnComponentHit.Clear();
 }
 
 

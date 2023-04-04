@@ -99,7 +99,7 @@ void ANSPlayerCharacter::StartLookingAround()
 {
 	bWantsLookAround = true;
 
-	//if (bReloadAnimMontageInProgress) return;
+	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->StartAim();
 }
 

@@ -21,9 +21,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
 	UStaticMeshComponent* ArrowMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	USceneComponent* SceneRootComponent;
-
 	void ThrowArrow(const FVector& ShotDirection);
 
 	void SetDamageGiven(float Damage) { DamageGiven = Damage; }
@@ -39,8 +36,6 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-	UCapsuleComponent* CollisionComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	UProjectileMovementComponent* MovementComponent;

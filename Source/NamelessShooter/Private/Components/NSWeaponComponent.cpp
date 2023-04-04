@@ -65,6 +65,8 @@ void UNSWeaponComponent::Reload()
 {
 	if (!bArmed || !CurrentWeapon ||!CurrentWeapon->MayReload()) return;
 	const auto Character = Cast<ACharacter>(GetOwner());
+	if (!Character) return;
+	StopAim();
 	const auto CurrentWeaponData = GetCurrentWeaponData();
 
 	if (!CurrentWeaponData->ReloadAnimMontage) checkNoEntry();
@@ -84,10 +86,10 @@ TSubclassOf<UAnimInstance> UNSWeaponComponent::GetCurrentAnimInstanceClass()
 void UNSWeaponComponent::StartAim()
 { 
 	if (!CurrentWeapon) return;
-
+	const auto Character = Cast<ACharacter>(GetOwner());
+	if (Character->GetCurrentMontage()) return;
 	if (CurrentWeapon->StartAim()) 
 	{
-		const auto Character = Cast<ACharacter>(GetOwner());
 		const auto CurrentWeaponData = GetCurrentWeaponData();
 		if (!CurrentWeaponData->bNeedAimAnimMontage || !CurrentWeaponData->AimAnimMontage) checkNoEntry(); // скорее всего не установлен AimAnimMontage
 		Character->PlayAnimMontage(CurrentWeaponData->AimAnimMontage);

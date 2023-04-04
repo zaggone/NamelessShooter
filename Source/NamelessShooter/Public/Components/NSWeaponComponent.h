@@ -65,6 +65,9 @@ protected:
 
 public:	
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartAim();
+
 	UFUNCTION(BlueprintCallable)
 	bool IsArmed() { return bArmed; }
 

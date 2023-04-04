@@ -43,7 +43,8 @@ void ANSBow::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVe
 bool ANSBow::StartAim()
 {
 	if (!GetOwner() || !CurrentArrow) return false;
-	bAim = true;
+	if (bAim) return true;
+	GetWorld()->GetTimerManager().SetTimer(AimTimerHandle, this, &ANSBow::AimTrue, 0.2f, false);
 	return true;
 }
 
@@ -51,6 +52,7 @@ bool ANSBow::StopAim()
 {
 	if (!GetOwner() || !CurrentArrow) return false;
 	bAim = false;
+	GetWorld()->GetTimerManager().ClearTimer(AimTimerHandle);
 	return true;
 }
 
@@ -71,8 +73,10 @@ void ANSBow::SpawnArrow()
 // переопределяем для добавляения исключений
 void ANSBow::Shot()
 {
+	UE_LOG(LogTemp, Error, TEXT("aim? %i"), bAim)
 	if (!bAim || !CurrentArrow) return;
 	Super::Shot();
+	StopAim();
 }
 // чистка указателя на стрелу 
 void ANSBow::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -113,4 +117,9 @@ void ANSBow::OnOwnerDeath()
 	CurrentArrow->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentArrow->OnOwnerDeath();
 	CurrentArrow = nullptr;
+}
+
+void ANSBow::AimTrue()
+{
+	bAim = true;
 }
