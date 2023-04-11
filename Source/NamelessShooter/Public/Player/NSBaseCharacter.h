@@ -67,6 +67,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTakeDamage();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartAim();
 	
 	void Shot();
 

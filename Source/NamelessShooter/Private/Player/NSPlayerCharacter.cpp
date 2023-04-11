@@ -101,6 +101,7 @@ void ANSPlayerCharacter::StartLookingAround()
 
 	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->StartAim();
+	OnStartAim();
 }
 
 // колл бек на конец обзора окружения
