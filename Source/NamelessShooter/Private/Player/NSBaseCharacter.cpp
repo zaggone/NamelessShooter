@@ -75,7 +75,6 @@ void ANSBaseCharacter::OnHealthChanged(float Health, float DeltaHealth)
 // на выстрел
 void ANSBaseCharacter::Shot()
 {
-	UE_LOG(LogTemp, Error, TEXT("reload? %i"), bReloadAnimMontageInProgress)
 	if (bReloadAnimMontageInProgress) return;
 	WeaponComponent->Shot();
 }

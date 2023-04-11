@@ -50,7 +50,4 @@ private:
 
 	FName ArrowSocketName;
 
-	void AimTrue();
-
-	FTimerHandle AimTimerHandle;
 };
